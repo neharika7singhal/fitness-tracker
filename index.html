@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -37,89 +37,88 @@ button.copy-btn:hover {background:#27ae60;}
 
 <script>
 const plan = {
- Mon: {
-  focus: 'Upper body toning (shoulder-friendly)',
+ Day1: {
+  focus: 'Push & triceps (upper, slim focus)',
   exercises: [
-   {name:'Cable face-pulls', reps:'3 x 15-20', note:'Light-moderate. Pull rope toward face, elbows high. Feel rear shoulders and upper-back, not neck.'},
-   {name:'Dumbbell scapular push-ups', reps:'3 x 15-20', note:'Body-weight or incline. Let chest sink then push floor away to spread shoulder blades. Feel around shoulder blades, not lower back.'},
-   {name:'Standing banded pull-aparts', reps:'3 x 15-20', note:'Light band. Arms at chest height, soft elbows. Feel rear delts/upper-back; traps relaxed.'},
-   {name:'Cable low-to-high rows', reps:'3 x 15-20', note:'Moderate. Pull from low to ribs, pause and squeeze. Feel mid-back and a bit of biceps, not lower back.'},
-   {name:'Triceps rope push-downs', reps:'3 x 15-20', note:'Light-moderate. Elbows by sides, straighten arms and gently flare rope. Feel back of upper arm.'},
-   {name:'Hammer curl (light)', reps:'3 x 15-20', note:'Light. Palms facing in, elbows by sides. Feel front of arm; avoid swinging shoulders.'}
+   {name:'Machine chest press', reps:'3 x 10-12', note:'Moderate load. Stop 2–3 reps before failure; aim for gentle chest work, not a huge pump.'},
+   {name:'Pec deck / chest fly', reps:'2-3 x 12-15', note:'Light. Focus on stretch and squeeze, elbows soft. Stop well before discomfort.'},
+   {name:'Machine shoulder press', reps:'3 x 10-12', note:'Controlled. If shoulders feel too pumped or wide, you can keep this at 2 sets.'},
+   {name:'Lateral raise machine / cables', reps:'2-3 x 15-20', note:'Very light. Lift to just below shoulder height; feel side shoulders, neck relaxed.'},
+   {name:'Triceps rope pushdown', reps:'3 x 10-12', note:'Elbows by sides. Straighten arms and squeeze back of upper arm at bottom.'},
+   {name:'Overhead cable triceps extension', reps:'2-3 x 12-15', note:'Light-moderate. Elbows pointing up; feel stretch and squeeze along back of arm.'}
   ],
   core: [
-   {name:'Upward plank', reps:'3 x 20-30s hold', note:'Body in straight line, hands under shoulders. Feel deep abs and shoulders stabilizing, not lower back.'}
+   {name:'Cable crunch', reps:'3 x 12-15', note:'Kneeling or standing. Ribs down, curl from upper abs; don’t just pull with arms.'}
   ]
  },
- Tue: {
-  focus: 'Lower body strength + glutes',
+ Day2: {
+  focus: 'Lower body & glutes (machines)',
   exercises: [
-   {name:'Goblet squat', reps:'3 x 12-15', note:'Moderate. Hold weight to chest, sit between hips. Feel quads and glutes; no knee or low-back pain.'},
-   {name:'Romanian deadlift (DB)', reps:'3 x 12-15', note:'Light-moderate. Soft knees, hinge at hips, back neutral. Feel hamstrings and glutes stretch, not spine.'},
-   {name:'Leg press', reps:'3 x 12-15', note:'Moderate. Feet shoulder-width, push through heels. Feel quads and glutes; knees track over toes.'},
-   {name:'Hip-abduction machine', reps:'3 x 15-20', note:'Light-moderate. Sit tall, open knees smoothly. Feel outer hips/glutes, not lower back.'},
-   {name:'Standing calf raise', reps:'3 x 15-20', note:'Body-weight to moderate. Rise slowly onto toes, full stretch at bottom. Feel calves only.'},
-   {name:'Seated leg curl', reps:'3 x 12-15', note:'Moderate. Curl heels toward seat, pause at bottom. Feel back of thighs, not knees.'}
+   {name:'Leg press', reps:'3-4 x 12-15', note:'Feet shoulder-width, push through heels. Feel quads and glutes; no knee pain.'},
+   {name:'Romanian deadlift (Smith/DB)', reps:'3 x 10-12', note:'Soft knees, hinge at hips. Feel hamstring stretch and glutes, back neutral.'},
+   {name:'Leg curl (seated or lying)', reps:'3 x 12-15', note:'Curl heels toward seat, pause at bottom. Feel back of thighs, not knees.'},
+   {name:'Leg extension (light, optional)', reps:'2-3 x 12-15', note:'Light load. Only if knees feel good; stop if you feel joint discomfort.'},
+   {name:'Hip abduction machine', reps:'3 x 15-20', note:'Sit tall, open knees smoothly. Feel outer hips/glutes, not lower back.'},
+   {name:'Calf raise machine (standing/seated)', reps:'3 x 15-20', note:'Rise slowly onto toes, full stretch at bottom. Feel calves only.'}
   ],
   core: [
-   {name:'Bicycle crunches', reps:'3 x 20 each side', note:'Rotate ribcage toward opposite knee, move slowly. Feel obliques and upper abs, not neck.'}
+   {name:'Front plank', reps:'3 x 20-30s', note:'Body in straight line; feel deep abs, not lower back.'},
+   {name:'Side plank', reps:'2 x 20-30s each side', note:'Hips stacked, feel side of waist and shoulder.'}
   ]
  },
- Wed: {
-  focus: 'Active recovery + mobility',
+ Day3: {
+  focus: 'Rest / light movement',
   exercises: [
-   {name:"Mobility circuit (cat-cow, thread-the-needle, world's greatest stretch)", reps:'2-3 easy rounds', note:'Slow, controlled movements. Focus on gentle stretch and breathing, not intensity.'}
+   {name:'Walk / yoga / stretching', reps:'20-30 min easy', note:'Gentle pace. Relax, focus on breathing and recovery.'}
   ],
   core: []
  },
- Thu: {
-  focus: 'Upper body posture & back',
+ Day4: {
+  focus: 'Back, posture & arms',
   exercises: [
-   {name:'Lat pull-down (wide grip)', reps:'3 x 12-15', note:'Moderate. Lean slightly back, pull bar to upper chest. Feel lats and mid-back, not neck.'},
-   {name:'Dumbbell lateral raise (very light)', reps:'3 x 15-20', note:'Very light. Lift to just below shoulder height. Feel side shoulders; if neck works too hard, lower weight.'},
-   {name:'Seated cable row', reps:'3 x 12-15', note:'Moderate. Upright torso, pull handle to belly. Feel mid-back and a bit of biceps; shoulders down.'},
-   {name:'Chest press (light, tempo 3-0-3)', reps:'3 x 15-20', note:'Very light. 3s down, 3s up. Feel chest and triceps; avoid pushing to a big chest pump.'},
-   {name:'Reverse flyes (machine or cables)', reps:'3 x 15-20', note:'Light. Open arms in wide arc. Feel rear delts/upper-back; neck relaxed.'},
-   {name:'EZ-bar curl', reps:'3 x 15-20', note:'Light. Elbows under shoulders, curl with control. Feel biceps, not shoulders.'}
+   {name:'Lat pulldown (medium/wide grip)', reps:'3 x 10-12', note:'Lean slightly back, pull bar to upper chest. Feel lats and mid-back, not neck.'},
+   {name:'Seated cable row / machine row', reps:'3 x 10-12', note:'Torso upright, pull handle to belly. Squeeze shoulder blades together.'},
+   {name:'Face pull (cable)', reps:'3 x 12-15', note:'Rope to face, elbows high. Feel rear delts and upper-back, neck relaxed.'},
+   {name:'Reverse fly machine', reps:'2-3 x 12-15', note:'Light. Open arms in wide arc; feel rear shoulders and between shoulder blades.'},
+   {name:'Biceps curl (cable or machine)', reps:'2-3 x 10-12', note:'Elbows under shoulders, curl with control. Stop before big biceps pump.'},
+   {name:'Triceps pushdown (light)', reps:'2 x 12-15', note:'Light. Gentle squeeze; this is extra shape work, not heavy strength.'}
   ],
   core: [
-   {name:'Upward plank', reps:'3 x 20-30s hold', note:'Same as Monday: feel deep abs and shoulders, not lower back.'}
+   {name:'Pallof press OR torso rotation', reps:'2-3 x 12-15 each side', note:'Light. Resist twisting (Pallof) or rotate slowly (machine); feel obliques and waist.'}
   ]
  },
- Fri: {
-  focus: 'Lower body + glutes & hips',
+ Day5: {
+  focus: 'Glutes, hips & thighs',
   exercises: [
-   {name:'Bulgarian split squat (DB)', reps:'3 x 12-15 each leg', note:'Light-moderate. Front knee over mid-foot, torso tall. Feel front-leg glute and quad; stretch in back hip.'},
-   {name:'Step-up (box)', reps:'3 x 12-15 each leg', note:'Light-moderate. Push through whole foot and heel. Feel glutes and quads of working leg.'},
-   {name:'Hip-thrust (machine or DB)', reps:'3 x 12-15', note:'Moderate. Chin tucked, ribs down, squeeze glutes at top. Feel glutes, not lower back.'},
-   {name:'Seated leg curl', reps:'3 x 12-15', note:'Same as Tuesday: feel back of thighs, not knees.'},
-   {name:'Standing hip-abduction (cable)', reps:'3 x 15-20', note:'Light. Stand tall, move leg out to side with control. Feel outer hip/glute.'},
-   {name:'Seated calf raise', reps:'3 x 15-20', note:'Same as standing calf raise but with bent knees; feel lower calves.'}
+   {name:'Split squat / lunge (Smith or guided)', reps:'3 x 10-12 each leg', note:'Front knee over mid-foot, torso tall. Feel front-leg glute and quad.'},
+   {name:'Hip thrust (machine or Smith)', reps:'3-4 x 10-12', note:'Chin tucked, ribs down. Squeeze glutes hard at top; no lower-back arch.'},
+   {name:'Step-up (box, light DBs or body-weight)', reps:'2-3 x 10-12 each leg', note:'Step up through whole front foot and heel. Feel glute and quad of front leg.'},
+   {name:'Leg curl (2nd exposure)', reps:'2-3 x 12-15', note:'Same cues as Day 2; smooth control, no jerking.'},
+   {name:'Hip abduction machine (2nd exposure)', reps:'3 x 15-20', note:'Same cues as Day 2; focus on outer-hip burn.'},
+   {name:'Calf raise machine', reps:'2-3 x 15-20', note:'Same cues as Day 2; slow up and down.'}
   ],
   core: [
-   {name:'Leg raises (hanging/lying)', reps:'3 x 12-15', note:'Press lower back into bench, lift legs slowly. Feel lower abs; if back arches, bend knees or reduce range.'}
+   {name:'Leg raises (lying or chair)', reps:'3 x 10-15', note:'Press lower back into bench, lift legs slowly. Feel lower abs; bend knees if needed.'}
   ]
  },
- Sat: {
-  focus: 'Long session – full body & extra cardio',
+ Day6: {
+  focus: 'Arms + core (shape, not bulk)',
   exercises: [
-   {name:'Goblet squat (best set)', reps:'3 x 12-15', note:'Same cues as Tuesday; choose a challenging but controlled weight.'},
-   {name:'Romanian deadlift (DB)', reps:'3 x 12-15', note:'Same cues as Tuesday; focus on hamstring stretch.'},
-   {name:'Cable face-pulls', reps:'3 x 15-20', note:'Same cues as Monday; think posture and upper-back.'},
-   {name:'Seated cable row', reps:'3 x 12-15', note:'Same cues as Thursday.'},
-   {name:'Hip-thrust (machine or DB)', reps:'3 x 12-15', note:'Same cues as Friday; strong glute squeeze.'},
-   {name:'Dumbbell lateral raise (very light)', reps:'3 x 15-20', note:'Same cues as Thursday; very light weight.'}
+   {name:'Triceps rope pushdown', reps:'3 x 10-12', note:'Part of a superset. Do a set here, then move to overhead extension before resting.'},
+   {name:'Overhead cable triceps extension', reps:'3 x 12-15', note:'After each pushdown set, go straight into this, then rest 60–90s.'},
+   {name:'Cable or machine biceps curl', reps:'2-3 x 10-12', note:'Moderate-light. Elbows still, curl smoothly; avoid swinging.'},
+   {name:'Hammer curl (DB or cable rope)', reps:'2 x 12-15', note:'Palms facing in. Light weight; stop before arms feel too pumped.'}
   ],
   core: [
-   {name:'Upward plank', reps:'3 x 20-30s', note:'Deep abs and shoulders.'},
-   {name:'Bicycle crunches', reps:'3 x 20 each side', note:'Slow and controlled, feel obliques.'},
-   {name:'Side plank', reps:'2 x 20-30s each side', note:'Feel side of waist and shoulder; hips stacked.'}
+   {name:'Cable crunch', reps:'3 x 12-15', note:'Upper abs focus; ribs down and curl, don’t hinge at hips only.'},
+   {name:'Side plank', reps:'2 x 20-30s each side', note:'Side of waist and shoulder working; breathe steadily.'},
+   {name:'Bicycle crunches or cross-body climbers', reps:'2 x 20 each side', note:'Slow and controlled; rotate through ribcage, feel obliques.'}
   ]
  },
- Sun: {
-  focus: 'Rest or light movement',
+ Day7: {
+  focus: 'Rest / recovery',
   exercises: [
-   {name:'Walk / yoga / foam-roll', reps:'20-30 min easy', note:'Gentle pace; focus on relaxation and blood flow.'}
+   {name:'Walk / yoga / foam-roll', reps:'20-30 min easy', note:'Gentle movement, focus on relaxation and blood flow.'}
   ],
   core: []
  }
@@ -186,7 +185,7 @@ function createDaySection(day, index) {
 
   if (data.core && data.core.length) {
     const coreTitle = document.createElement('h3');
-    coreTitle.textContent = 'Core finisher';
+    coreTitle.textContent = 'Core / finisher';
     section.appendChild(coreTitle);
     const coreTable = document.createElement('table');
     const coreThead = document.createElement('thead');
@@ -201,7 +200,7 @@ function createDaySection(day, index) {
   }
 
   const cardioTitle = document.createElement('h3');
-  cardioTitle.textContent = 'Incline treadmill (15 min)';
+  cardioTitle.textContent = 'Incline treadmill (10–15 min, most training days)';
   section.appendChild(cardioTitle);
   const cardioTable = document.createElement('table');
   const cardioThead = document.createElement('thead');
@@ -232,7 +231,7 @@ function createDaySection(day, index) {
   const notesArea = document.createElement('textarea');
   notesArea.className = 'note';
   notesArea.name = day + '-notes';
-  notesArea.placeholder = 'How did today feel? Energy, cycle phase, soreness, food, mood, etc.';
+  notesArea.placeholder = 'How did today feel? Energy, cycle phase, soreness, weights, mood, etc.';
   section.appendChild(notesArea);
 
   trackerDiv.appendChild(section);
