@@ -26,8 +26,18 @@ th {background:#f3f6f7;font-weight:600;}
 .status-group label {font-weight:normal;line-height:1.35;}
 input[type="radio"] {margin-right:4px;}
 .small-note {font-size:10px;color:#777;margin-top:2px;}
-textarea.note {width:100%;min-height:70px;font-size:12px;padding:8px;box-sizing:border-box;}
-input.meal-input {width:100%;font-size:12px;padding:6px;box-sizing:border-box;}
+textarea.note {width:100%;min-height:80px;font-size:12px;padding:8px;box-sizing:border-box;}
+textarea.meal-box {
+  width:100%;
+  min-height:130px;
+  font-size:12px;
+  line-height:1.45;
+  padding:10px;
+  box-sizing:border-box;
+  resize:vertical;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
 button.copy-btn {padding:9px 12px;background:#2ecc71;color:#fff;border:none;cursor:pointer;margin-top:8px;border-radius:6px;font-size:12px;}
 button.copy-btn:hover {background:#27ae60;}
 
@@ -37,7 +47,8 @@ button.copy-btn:hover {background:#27ae60;}
   table {font-size:11px;}
   th, td {padding:6px;}
   .top-switch button, .tab {font-size:12px;padding:7px 10px;}
-  textarea.note, input.meal-input {font-size:12px;}
+  textarea.note, textarea.meal-box {font-size:12px;}
+  textarea.meal-box {min-height:150px;}
 }
 </style>
 </head>
@@ -55,10 +66,8 @@ button.copy-btn:hover {background:#27ae60;}
 <button class="copy-btn" id="copy-btn">Copy summary for coach</button>
 
 <script>
-// Days
 const dayOrder = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
-// Gym plan (shortened text but same structure)
 const gymPlan = {
   Mon: {
     focus: 'Push & triceps (upper, slim focus)',
@@ -70,9 +79,7 @@ const gymPlan = {
       {name:'Triceps rope pushdown', reps:'3 x 10-12', note:'Elbows by sides.'},
       {name:'Overhead cable triceps extension', reps:'2-3 x 12-15', note:'Light-moderate.'}
     ],
-    core: [
-      {name:'Cable crunch', reps:'3 x 12-15', note:'Upper abs focus.'}
-    ],
+    core: [{name:'Cable crunch', reps:'3 x 12-15', note:'Upper abs focus.'}],
     functional: [
       {name:'Battle ropes (waves)', reps:'3 x 20–30s', note:'Optional.'},
       {name:'Incline treadmill / stepper intervals', reps:'3–4 x 1–2 min', note:'Optional.'},
@@ -118,9 +125,7 @@ const gymPlan = {
       {name:'Biceps curl', reps:'2-3 x 10-12', note:'Controlled.'},
       {name:'Triceps pushdown (light)', reps:'2 x 12-15', note:'Light only.'}
     ],
-    core: [
-      {name:'Pallof press / torso rotation', reps:'2-3 x 12-15 each side', note:'Obliques.'}
-    ],
+    core: [{name:'Pallof press / torso rotation', reps:'2-3 x 12-15 each side', note:'Obliques.'}],
     functional: [
       {name:'Farmer’s carry', reps:'2–3 x 20–30m', note:'Optional.'},
       {name:'Band pull-apart + face pull', reps:'2–3 x 12–15', note:'Optional.'},
@@ -137,9 +142,7 @@ const gymPlan = {
       {name:'Hip abduction', reps:'3 x 15-20', note:'Outer hips.'},
       {name:'Calf raise', reps:'2-3 x 15-20', note:'Slow.'}
     ],
-    core: [
-      {name:'Leg raises', reps:'3 x 10-15', note:'Lower abs.'}
-    ],
+    core: [{name:'Leg raises', reps:'3 x 10-15', note:'Lower abs.'}],
     functional: [
       {name:'Mini-band lateral walks', reps:'2–3 x 12–15 steps', note:'Optional.'},
       {name:'Walking lunges', reps:'2 x 10–12 each leg', note:'Optional.'},
@@ -166,179 +169,91 @@ const gymPlan = {
   },
   Sun: {
     focus: 'Rest / recovery',
-    exercises: [
-      {name:'Walk / yoga / foam-roll', reps:'20-30 min easy', note:'Recovery.'}
-    ],
+    exercises: [{name:'Walk / yoga / foam-roll', reps:'20-30 min easy', note:'Recovery.'}],
     core: [],
     functional: []
   }
 };
 
-// Diet plan: meals per day, each with list of items (prefilled but editable)
 const dietPlan = {
   Mon: {
     focus: 'Diet – Monday',
     meals: {
-      'EARLY MORNING (before workout)': [
-        'multivitamin sachet-1 glass',
-        '5 almonds + 1 brazil nut + 1 walnut',
-        '4 black raisins (soaked overnight)'
-      ],
-      'AFTER WORKOUT': ['protein scoop – 1 scoop in 200–250 ml water'],
-      'SNACK 1 (before leaving for office)': ['black coffee – 1 cup'],
-      'MM (after you reach office)': ['coconut water – 1 glass (with pulp)'],
-      'LUNCH': [
-        'light daal 1 katori (150 g cooked)',
-        'white rice 1 katori (120 g) / 1 chapati (jowar/khapli)',
-        'curd 1 katori (150 g)',
-        'cucumber salad 1 plate'
-      ],
-      'POST LUNCH (in office)': ['spearmint tea – 1 cup', '10 min walk'],
-      'BLACK COFFEE (evening – optional)': ['black coffee – 1 cup'],
-      'SNACK 1 (evening protein)': ['eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g'],
-      'SNACK 2 (before leaving for home)': [
-        'fruit 150 g',
-        '1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee'
-      ],
-      'DINNER': [
-        'paneer 100 g',
-        'cooked veggies (no raw tomato)',
-        'cucumber salad 1 plate',
-        'coriander chutney 1 spoon'
-      ],
-      'POST DINNER': ['chamomile tea 1 cup', 'castor oil on navel']
+      'EARLY MORNING (before workout)': 'multivitamin sachet-1 glass\n5 almonds + 1 brazil nut + 1 walnut\n4 black raisins (soaked overnight)',
+      'AFTER WORKOUT': 'protein scoop – 1 scoop in 200–250 ml water',
+      'SNACK 1 (before leaving for office)': 'black coffee – 1 cup',
+      'MM (after you reach office)': 'coconut water – 1 glass (with pulp)',
+      'LUNCH': 'light daal 1 katori (150 g cooked)\nwhite rice 1 katori (120 g) / 1 chapati (jowar/khapli)\ncurd 1 katori (150 g)\ncucumber salad 1 plate',
+      'POST LUNCH (in office)': 'spearmint tea – 1 cup\n10 min walk',
+      'BLACK COFFEE (evening – optional)': 'black coffee – 1 cup',
+      'SNACK 1 (evening protein)': 'eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g',
+      'SNACK 2 (before leaving for home)': 'fruit 150 g\n1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee',
+      'DINNER': 'paneer 100 g\ncooked veggies (no raw tomato)\ncucumber salad 1 plate\ncoriander chutney 1 spoon',
+      'POST DINNER': 'chamomile tea 1 cup\ncastor oil on navel'
     }
   },
   Tue: {
     focus: 'Diet – Tuesday',
     meals: {
-      'EARLY MORNING (before workout)': [
-        'multivitamin sachet-1 glass',
-        '5 almonds + 1 brazil nut + 1 walnut',
-        '4 black raisins (soaked overnight)'
-      ],
-      'AFTER WORKOUT': ['protein scoop – 1 scoop in 200–250 ml water'],
-      'SNACK 1 (before leaving for office)': ['black coffee – 1 cup'],
-      'MM (after you reach office)': ['coconut water – 1 glass (with pulp)'],
-      'LUNCH': [
-        'sambhar 1 katori (150 g)',
-        'idli 2 pieces / plain dosa 1',
-        'cucumber salad 1 plate',
-        'coconut chutney 1 spoon'
-      ],
-      'POST LUNCH (in office)': ['spearmint tea – 1 cup', '10 min walk'],
-      'BLACK COFFEE (evening – optional)': ['black coffee – 1 cup'],
-      'SNACK 1 (evening protein)': ['eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g'],
-      'SNACK 2 (before leaving for home)': [
-        'fruit 150 g',
-        '1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee'
-      ],
-      'DINNER': [
-        'chilly tempeh 100 g',
-        'light veg 1 katori',
-        'cucumber salad 1 plate',
-        'coriander chutney 1 spoon'
-      ],
-      'POST DINNER': ['chamomile tea 1 cup', 'castor oil on navel']
+      'EARLY MORNING (before workout)': 'multivitamin sachet-1 glass\n5 almonds + 1 brazil nut + 1 walnut\n4 black raisins (soaked overnight)',
+      'AFTER WORKOUT': 'protein scoop – 1 scoop in 200–250 ml water',
+      'SNACK 1 (before leaving for office)': 'black coffee – 1 cup',
+      'MM (after you reach office)': 'coconut water – 1 glass (with pulp)',
+      'LUNCH': 'sambhar 1 katori (150 g)\nidli 2 pieces / plain dosa 1\ncucumber salad 1 plate\ncoconut chutney 1 spoon',
+      'POST LUNCH (in office)': 'spearmint tea – 1 cup\n10 min walk',
+      'BLACK COFFEE (evening – optional)': 'black coffee – 1 cup',
+      'SNACK 1 (evening protein)': 'eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g',
+      'SNACK 2 (before leaving for home)': 'fruit 150 g\n1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee',
+      'DINNER': 'chilly tempeh 100 g\nlight veg 1 katori\ncucumber salad 1 plate\ncoriander chutney 1 spoon',
+      'POST DINNER': 'chamomile tea 1 cup\ncastor oil on navel'
     }
   },
   Wed: {
     focus: 'Diet – Wednesday',
     meals: {
-      'EARLY MORNING (before workout)': [
-        'multivitamin sachet-1 glass',
-        '5 almonds + 1 brazil nut + 1 walnut',
-        '4 black raisins (soaked overnight)'
-      ],
-      'AFTER WORKOUT': ['protein scoop – 1 scoop in 200–250 ml water'],
-      'SNACK 1 (before leaving for office)': ['black coffee – 1 cup'],
-      'MM (after you reach office)': ['coconut water – 1 glass (with pulp)'],
-      'LUNCH': [
-        'lobia 1 katori (150 g cooked)',
-        'white rice 1 katori (120 g) / 1 chapati (jowar/khapli)',
-        'curd 1 katori (150 g)',
-        'cucumber salad 1 plate'
-      ],
-      'POST LUNCH (in office)': ['spearmint tea – 1 cup', '10 min walk'],
-      'BLACK COFFEE (evening – optional)': ['black coffee – 1 cup'],
-      'SNACK 1 (evening protein)': ['eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g'],
-      'SNACK 2 (before leaving for home)': [
-        'fruit 150 g',
-        '1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee'
-      ],
-      'DINNER': [
-        'shirataki noodles 30 g (uncooked, ~140 g boiled)',
-        'homemade tomato puree',
-        'cooked veggies',
-        'cucumber salad 1 plate'
-      ],
-      'POST DINNER': ['chamomile tea 1 cup', 'castor oil on navel']
+      'EARLY MORNING (before workout)': 'multivitamin sachet-1 glass\n5 almonds + 1 brazil nut + 1 walnut\n4 black raisins (soaked overnight)',
+      'AFTER WORKOUT': 'protein scoop – 1 scoop in 200–250 ml water',
+      'SNACK 1 (before leaving for office)': 'black coffee – 1 cup',
+      'MM (after you reach office)': 'coconut water – 1 glass (with pulp)',
+      'LUNCH': 'lobia 1 katori (150 g cooked)\nwhite rice 1 katori (120 g) / 1 chapati (jowar/khapli)\ncurd 1 katori (150 g)\ncucumber salad 1 plate',
+      'POST LUNCH (in office)': 'spearmint tea – 1 cup\n10 min walk',
+      'BLACK COFFEE (evening – optional)': 'black coffee – 1 cup',
+      'SNACK 1 (evening protein)': 'eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g',
+      'SNACK 2 (before leaving for home)': 'fruit 150 g\n1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee',
+      'DINNER': 'shirataki noodles 30 g (uncooked, ~140 g boiled)\nhomemade tomato puree\ncooked veggies\ncucumber salad 1 plate',
+      'POST DINNER': 'chamomile tea 1 cup\ncastor oil on navel'
     }
   },
   Thu: {
     focus: 'Diet – Thursday',
     meals: {
-      'EARLY MORNING (before workout)': [
-        'multivitamin sachet-1 glass',
-        '5 almonds + 1 brazil nut + 1 walnut',
-        '4 black raisins (soaked overnight)'
-      ],
-      'AFTER WORKOUT': ['protein scoop – 1 scoop in 200–250 ml water'],
-      'SNACK 1 (before leaving for office)': ['black coffee – 1 cup'],
-      'MM (after you reach office)': ['coconut water – 1 glass (with pulp)'],
-      'LUNCH': [
-        'moong dal khichdi 1 katori (180 g)',
-        'light veg 1 katori',
-        'curd 1 katori (150 g)',
-        'cucumber salad 1 plate'
-      ],
-      'POST LUNCH (in office)': ['spearmint tea – 1 cup', '10 min walk'],
-      'BLACK COFFEE (evening – optional)': ['black coffee – 1 cup'],
-      'SNACK 1 (evening protein)': ['eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g'],
-      'SNACK 2 (before leaving for home)': [
-        'fruit 150 g',
-        '1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee'
-      ],
-      'DINNER': [
-        'chilly paneer 100 g',
-        'cooked veggies',
-        'cucumber salad 1 plate',
-        'coriander chutney 1 spoon'
-      ],
-      'POST DINNER': ['chamomile tea 1 cup', 'castor oil on navel']
+      'EARLY MORNING (before workout)': 'multivitamin sachet-1 glass\n5 almonds + 1 brazil nut + 1 walnut\n4 black raisins (soaked overnight)',
+      'AFTER WORKOUT': 'protein scoop – 1 scoop in 200–250 ml water',
+      'SNACK 1 (before leaving for office)': 'black coffee – 1 cup',
+      'MM (after you reach office)': 'coconut water – 1 glass (with pulp)',
+      'LUNCH': 'moong dal khichdi 1 katori (180 g)\nlight veg 1 katori\ncurd 1 katori (150 g)\ncucumber salad 1 plate',
+      'POST LUNCH (in office)': 'spearmint tea – 1 cup\n10 min walk',
+      'BLACK COFFEE (evening – optional)': 'black coffee – 1 cup',
+      'SNACK 1 (evening protein)': 'eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g',
+      'SNACK 2 (before leaving for home)': 'fruit 150 g\n1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee',
+      'DINNER': 'chilly paneer 100 g\ncooked veggies\ncucumber salad 1 plate\ncoriander chutney 1 spoon',
+      'POST DINNER': 'chamomile tea 1 cup\ncastor oil on navel'
     }
   },
   Fri: {
     focus: 'Diet – Friday',
     meals: {
-      'EARLY MORNING (before workout)': [
-        'multivitamin sachet-1 glass',
-        '5 almonds + 1 brazil nut + 1 walnut',
-        '4 black raisins (soaked overnight)'
-      ],
-      'AFTER WORKOUT': ['protein scoop – 1 scoop in 200–250 ml water'],
-      'SNACK 1 (before leaving for office)': ['black coffee – 1 cup'],
-      'MM (after you reach office)': ['coconut water – 1 glass (with pulp)'],
-      'LUNCH': [
-        '2 jowar or khapli chapati',
-        'light veg 1 katori',
-        'curd 1 katori (150 g)',
-        'cucumber salad 1 plate'
-      ],
-      'POST LUNCH (in office)': ['spearmint tea – 1 cup', '10 min walk'],
-      'BLACK COFFEE (evening – optional)': ['black coffee – 1 cup'],
-      'SNACK 1 (evening protein)': ['eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g'],
-      'SNACK 2 (before leaving for home)': [
-        'fruit 150 g',
-        '1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee'
-      ],
-      'DINNER': [
-        'tempeh bhurji 100 g',
-        'light veg 1 katori',
-        'cucumber salad 1 plate',
-        'coriander chutney 1 spoon'
-      ],
-      'POST DINNER': ['chamomile tea 1 cup', 'castor oil on navel']
+      'EARLY MORNING (before workout)': 'multivitamin sachet-1 glass\n5 almonds + 1 brazil nut + 1 walnut\n4 black raisins (soaked overnight)',
+      'AFTER WORKOUT': 'protein scoop – 1 scoop in 200–250 ml water',
+      'SNACK 1 (before leaving for office)': 'black coffee – 1 cup',
+      'MM (after you reach office)': 'coconut water – 1 glass (with pulp)',
+      'LUNCH': '2 jowar or khapli chapati\nlight veg 1 katori\ncurd 1 katori (150 g)\ncucumber salad 1 plate',
+      'POST LUNCH (in office)': 'spearmint tea – 1 cup\n10 min walk',
+      'BLACK COFFEE (evening – optional)': 'black coffee – 1 cup',
+      'SNACK 1 (evening protein)': 'eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g',
+      'SNACK 2 (before leaving for home)': 'fruit 150 g\n1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee',
+      'DINNER': 'tempeh bhurji 100 g\nlight veg 1 katori\ncucumber salad 1 plate\ncoriander chutney 1 spoon',
+      'POST DINNER': 'chamomile tea 1 cup\ncastor oil on navel'
     }
   },
   Sat: { focus: 'Diet – Saturday (flex / social)', meals: {} },
@@ -361,6 +276,7 @@ function createStatusCell(nameBase, mode) {
   const options = mode === 'gym'
     ? ['Done','Part','Skip']
     : ['Followed & satisfied','Followed & not satisfied','Ate something else'];
+
   options.forEach(val => {
     const label = document.createElement('label');
     const input = document.createElement('input');
@@ -371,6 +287,7 @@ function createStatusCell(nameBase, mode) {
     label.appendChild(document.createTextNode(' ' + val));
     div.appendChild(label);
   });
+
   td.appendChild(div);
   return td;
 }
@@ -400,7 +317,7 @@ function createGymRow(day, ex, groupPrefix) {
   return tr;
 }
 
-function createDietMeal(day, mealName, items) {
+function createDietMeal(day, mealName, mealText) {
   const wrap = document.createElement('div');
 
   const title = document.createElement('h3');
@@ -408,27 +325,22 @@ function createDietMeal(day, mealName, items) {
   wrap.appendChild(title);
 
   const mealTable = document.createElement('table');
-  const head = document.createElement('thead');
-  head.innerHTML = '<tr><th>What to eat (planned)</th></tr>';
-  mealTable.appendChild(head);
-  const body = document.createElement('tbody');
+  const mealHead = document.createElement('thead');
+  mealHead.innerHTML = '<tr><th>What to eat (planned)</th></tr>';
+  mealTable.appendChild(mealHead);
 
-  items.forEach((item, idx) => {
-    const tr = document.createElement('tr');
-    const td = document.createElement('td');
-    const inp = document.createElement('input');
-    inp.type = 'text';
-    inp.className = 'meal-input';
-    inp.value = item;
-    inp.placeholder = 'Planned food item';
-    inp.dataset.meal = mealName;
-    inp.dataset.index = String(idx);
-    td.appendChild(inp);
-    tr.appendChild(td);
-    body.appendChild(tr);
-  });
-
-  mealTable.appendChild(body);
+  const mealBody = document.createElement('tbody');
+  const mealRow = document.createElement('tr');
+  const mealCell = document.createElement('td');
+  const textarea = document.createElement('textarea');
+  textarea.className = 'meal-box';
+  textarea.value = mealText || '';
+  textarea.placeholder = 'Meal plan';
+  textarea.dataset.meal = mealName;
+  mealCell.appendChild(textarea);
+  mealRow.appendChild(mealCell);
+  mealBody.appendChild(mealRow);
+  mealTable.appendChild(mealBody);
   wrap.appendChild(mealTable);
 
   const statusTitle = document.createElement('h3');
@@ -479,9 +391,9 @@ function createDaySection(day) {
     }
 
     if (data && data.core && data.core.length) {
-      const t = document.createElement('h3');
-      t.textContent = 'Core / finisher';
-      section.appendChild(t);
+      const title = document.createElement('h3');
+      title.textContent = 'Core / finisher';
+      section.appendChild(title);
       const table = document.createElement('table');
       const head = document.createElement('thead');
       head.innerHTML = '<tr><th>Exercise</th><th>Sets / Reps</th><th>Status</th></tr>';
@@ -493,9 +405,9 @@ function createDaySection(day) {
     }
 
     if (data && data.functional && data.functional.length) {
-      const t = document.createElement('h3');
-      t.textContent = 'Functional (optional – complements today’s focus)';
-      section.appendChild(t);
+      const title = document.createElement('h3');
+      title.textContent = 'Functional (optional – complements today’s focus)';
+      section.appendChild(title);
       const table = document.createElement('table');
       const head = document.createElement('thead');
       head.innerHTML = '<tr><th>Exercise</th><th>Sets / Reps</th><th>Status</th></tr>';
@@ -548,16 +460,16 @@ function createDaySection(day) {
 function buildUI() {
   tabsDiv.innerHTML = '';
   trackerDiv.innerHTML = '';
-  dayOrder.forEach(d => {
-    createTab(d);
-    createDaySection(d);
+  dayOrder.forEach(day => {
+    createTab(day);
+    createDaySection(day);
   });
 }
 
 function setActiveDay(day) {
   currentDay = day;
-  document.querySelectorAll('.tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.day === day);
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.day === day);
   });
   document.querySelectorAll('.day-section').forEach(sec => {
     sec.classList.toggle('active', sec.id === currentMode + '-section-' + day);
@@ -577,13 +489,14 @@ btnDiet.addEventListener('click', () => setMode('diet'));
 
 buildUI();
 
-copyBtn.addEventListener('click', function copySummary() {
+copyBtn.addEventListener('click', function () {
   const section = document.getElementById(currentMode + '-section-' + currentDay);
   if (!section) return;
 
   const lines = [];
   lines.push('Daily check-in — ' + currentDay);
   lines.push('Mode: ' + (currentMode === 'gym' ? 'Gym' : 'Diet'));
+
   const focusText = section.querySelector('.focus')?.textContent || '';
   if (focusText) lines.push('Session: ' + focusText.replace('Focus:','').trim());
 
@@ -601,10 +514,13 @@ copyBtn.addEventListener('click', function copySummary() {
         const radios = tr.querySelectorAll('input[type="radio"]');
         let status = 'skip';
         radios.forEach(r => { if (r.checked) status = r.value.toLowerCase(); });
+
         const name = nameCell ? nameCell.childNodes[0].textContent.trim() : '';
         if (!name) return;
+
         const reps = repsCell ? repsCell.textContent.trim() : '';
         const detail = reps ? ' [' + reps + ']' : '';
+
         if (isCardio) lines.push('- Cardio: ' + name + ' (' + status + ')');
         else if (isCore) lines.push('- Core: ' + name + detail + ': ' + status);
         else if (isFunc) lines.push('- Functional: ' + name + detail + ': ' + status);
@@ -613,19 +529,19 @@ copyBtn.addEventListener('click', function copySummary() {
     });
   } else {
     lines.push('Meals:');
+
     section.querySelectorAll('h3').forEach(h3 => {
       const mealName = h3.textContent.trim();
       if (mealName === 'Status' || mealName === 'Notes') return;
-      const itemsTable = h3.nextElementSibling;
-      if (!itemsTable || itemsTable.tagName !== 'TABLE') return;
 
-      const items = [];
-      itemsTable.querySelectorAll('input.meal-input').forEach(inp => {
-        if (inp.value.trim()) items.push(inp.value.trim());
-      });
+      const mealTable = h3.nextElementSibling;
+      if (!mealTable || mealTable.tagName !== 'TABLE') return;
+
+      const textarea = mealTable.querySelector('textarea.meal-box');
+      const mealText = textarea ? textarea.value.trim() : '';
 
       let status = 'no selection';
-      const statusHeading = itemsTable.nextElementSibling;
+      const statusHeading = mealTable.nextElementSibling;
       const statusTable = statusHeading && statusHeading.nextElementSibling && statusHeading.nextElementSibling.tagName === 'TABLE'
         ? statusHeading.nextElementSibling
         : null;
@@ -637,7 +553,11 @@ copyBtn.addEventListener('click', function copySummary() {
       }
 
       lines.push('- ' + mealName + ': ' + status);
-      items.forEach(item => lines.push('  - ' + item));
+      if (mealText) {
+        mealText.split('\n').forEach(line => {
+          if (line.trim()) lines.push('  - ' + line.trim());
+        });
+      }
     });
   }
 
@@ -649,11 +569,11 @@ copyBtn.addEventListener('click', function copySummary() {
     navigator.clipboard.writeText(summary).then(() => {
       alert('Summary copied. Paste it into chat for feedback.');
     }).catch(() => {
-      alert('Could not auto-copy. You can still copy from the console.');
+      alert('Could not auto-copy. Check console.');
       console.log(summary);
     });
   } else {
-    alert('Clipboard not available. Check console for text.');
+    alert('Clipboard not available. Check console.');
     console.log(summary);
   }
 });
