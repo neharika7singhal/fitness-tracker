@@ -5,132 +5,219 @@
 <title>Fitness tracker</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; margin:10px; background:#fafafa;}
-h1 {color:#2c3e50; font-size:20px; margin-bottom:6px;}
-.small {font-size:11px; color:#666;}
-.tab-container {display:flex; overflow-x:auto; border-bottom:1px solid #ddd; margin:8px 0 10px;}
-.tab {flex:0 0 auto; padding:6px 10px; cursor:pointer; border:1px solid #ddd; border-bottom:none; border-radius:6px 6px 0 0; background:#f0f2f5; margin-right:4px; font-size:11px; white-space:nowrap;}
-.tab.active {background:#ffffff; font-weight:600;}
-.day-section {display:none; padding:10px; background:#fff; border:1px solid #ddd; border-radius:0 6px 6px 6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+body {font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;margin:10px;background:#fafafa;}
+h1 {color:#2c3e50;font-size:20px;margin-bottom:6px;}
+.small {font-size:11px;color:#666;}
+.top-switch {display:flex;gap:6px;margin:8px 0;}
+.top-switch button {flex:1;padding:6px 8px;font-size:11px;border:1px solid #ccc;border-radius:4px;background:#f0f2f5;cursor:pointer;}
+.top-switch button.active {background:#ffffff;font-weight:600;border-color:#999;}
+.tab-container {display:flex;overflow-x:auto;border-bottom:1px solid #ddd;margin:8px 0 10px;}
+.tab {flex:0 0 auto;padding:6px 10px;cursor:pointer;border:1px solid #ddd;border-bottom:none;border-radius:6px 6px 0 0;background:#f0f2f5;margin-right:4px;font-size:11px;white-space:nowrap;}
+.tab.active {background:#ffffff;font-weight:600;}
+.day-section {display:none;padding:10px;background:#fff;border:1px solid #ddd;border-radius:0 6px 6px 6px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
 .day-section.active {display:block;}
-h2 {font-size:16px; margin:0 0 2px;}
-h3 {font-size:13px; margin:10px 0 4px;}
-.focus {font-size:11px; color:#555; margin-bottom:6px;}
-table {width:100%; border-collapse:collapse; font-size:11px;}
-th, td {border:1px solid #eee; padding:5px 6px; text-align:left; vertical-align:top;}
-th {background:#f3f6f7; font-weight:600;}
-.status-group {display:flex; gap:6px; flex-wrap:wrap; font-size:11px;}
+h2 {font-size:16px;margin:0 0 2px;}
+h3 {font-size:13px;margin:10px 0 4px;}
+.focus {font-size:11px;color:#555;margin-bottom:6px;}
+table {width:100%;border-collapse:collapse;font-size:11px;}
+th,td {border:1px solid #eee;padding:5px 6px;text-align:left;vertical-align:top;}
+th {background:#f3f6f7;font-weight:600;}
+.status-group {display:flex;gap:6px;flex-wrap:wrap;font-size:11px;}
 .status-group label {font-weight:normal;}
 input[type="radio"] {margin-right:2px;}
-.small-note {font-size:10px; color:#777; margin-top:2px;}
-textarea.note {width:100%; min-height:60px; font-size:11px; padding:6px; box-sizing:border-box;}
-button.copy-btn {padding:7px 10px; background:#2ecc71; color:#fff; border:none; cursor:pointer; margin-top:6px; border-radius:4px; font-size:11px;}
+.small-note {font-size:10px;color:#777;margin-top:2px;}
+textarea.note {width:100%;min-height:60px;font-size:11px;padding:6px;box-sizing:border-box;}
+input.meal-input {width:100%;font-size:11px;padding:4px;box-sizing:border-box;}
+button.copy-btn {padding:7px 10px;background:#2ecc71;color:#fff;border:none;cursor:pointer;margin-top:6px;border-radius:4px;font-size:11px;}
 button.copy-btn:hover {background:#27ae60;}
 </style>
 </head>
 <body>
 <h1>Fitness tracker</h1>
-<p class="small">Tap a tab, mark each exercise as Done / Part / Skip, add notes, then tap "Copy summary" and paste it into chat for feedback.</p>
+<p class="small">Choose Gym or Diet, tap a day, mark each item as Done / Part / Skip (Gym) or Followed / Ate something else (Diet), then tap "Copy summary" and paste it into chat.</p>
+
+<div class="top-switch">
+  <button id="btn-gym" class="active" onclick="setMode('gym')">Gym</button>
+  <button id="btn-diet" onclick="setMode('diet')">Diet</button>
+</div>
+
 <div class="tab-container" id="tabs"></div>
 <div id="tracker"></div>
 <button class="copy-btn" onclick="copySummary()">Copy summary for coach</button>
 
 <script>
-const plan = {
- Day1: {
-  focus: 'Push & triceps (upper, slim focus)',
-  exercises: [
-   {name:'Machine chest press', reps:'3 x 10-12', note:'Moderate load. Stop 2–3 reps before failure; aim for gentle chest work, not a huge pump.'},
-   {name:'Pec deck / chest fly', reps:'2-3 x 12-15', note:'Light. Focus on stretch and squeeze, elbows soft. Stop well before discomfort.'},
-   {name:'Machine shoulder press', reps:'3 x 10-12', note:'Controlled. If shoulders feel too pumped or wide, you can keep this at 2 sets.'},
-   {name:'Lateral raise machine / cables', reps:'2-3 x 15-20', note:'Very light. Lift to just below shoulder height; feel side shoulders, neck relaxed.'},
-   {name:'Triceps rope pushdown', reps:'3 x 10-12', note:'Elbows by sides. Straighten arms and squeeze back of upper arm at bottom.'},
-   {name:'Overhead cable triceps extension', reps:'2-3 x 12-15', note:'Light-moderate. Elbows pointing up; feel stretch and squeeze along back of arm.'}
-  ],
-  core: [
-   {name:'Cable crunch', reps:'3 x 12-15', note:'Kneeling or standing. Ribs down, curl from upper abs; don’t just pull with arms.'}
-  ]
- },
- Day2: {
-  focus: 'Lower body & glutes (machines)',
-  exercises: [
-   {name:'Leg press', reps:'3-4 x 12-15', note:'Feet shoulder-width, push through heels. Feel quads and glutes; no knee pain.'},
-   {name:'Romanian deadlift (Smith/DB)', reps:'3 x 10-12', note:'Soft knees, hinge at hips. Feel hamstring stretch and glutes, back neutral.'},
-   {name:'Leg curl (seated or lying)', reps:'3 x 12-15', note:'Curl heels toward seat, pause at bottom. Feel back of thighs, not knees.'},
-   {name:'Leg extension (light, optional)', reps:'2-3 x 12-15', note:'Light load. Only if knees feel good; stop if you feel joint discomfort.'},
-   {name:'Hip abduction machine', reps:'3 x 15-20', note:'Sit tall, open knees smoothly. Feel outer hips/glutes, not lower back.'},
-   {name:'Calf raise machine (standing/seated)', reps:'3 x 15-20', note:'Rise slowly onto toes, full stretch at bottom. Feel calves only.'}
-  ],
-  core: [
-   {name:'Front plank', reps:'3 x 20-30s', note:'Body in straight line; feel deep abs, not lower back.'},
-   {name:'Side plank', reps:'2 x 20-30s each side', note:'Hips stacked, feel side of waist and shoulder.'}
-  ]
- },
- Day3: {
-  focus: 'Rest / light movement',
-  exercises: [
-   {name:'Walk / yoga / stretching', reps:'20-30 min easy', note:'Gentle pace. Relax, focus on breathing and recovery.'}
-  ],
-  core: []
- },
- Day4: {
-  focus: 'Back, posture & arms',
-  exercises: [
-   {name:'Lat pulldown (medium/wide grip)', reps:'3 x 10-12', note:'Lean slightly back, pull bar to upper chest. Feel lats and mid-back, not neck.'},
-   {name:'Seated cable row / machine row', reps:'3 x 10-12', note:'Torso upright, pull handle to belly. Squeeze shoulder blades together.'},
-   {name:'Face pull (cable)', reps:'3 x 12-15', note:'Rope to face, elbows high. Feel rear delts and upper-back, neck relaxed.'},
-   {name:'Reverse fly machine', reps:'2-3 x 12-15', note:'Light. Open arms in wide arc; feel rear shoulders and between shoulder blades.'},
-   {name:'Biceps curl (cable or machine)', reps:'2-3 x 10-12', note:'Elbows under shoulders, curl with control. Stop before big biceps pump.'},
-   {name:'Triceps pushdown (light)', reps:'2 x 12-15', note:'Light. Gentle squeeze; this is extra shape work, not heavy strength.'}
-  ],
-  core: [
-   {name:'Pallof press OR torso rotation', reps:'2-3 x 12-15 each side', note:'Light. Resist twisting (Pallof) or rotate slowly (machine); feel obliques and waist.'}
-  ]
- },
- Day5: {
-  focus: 'Glutes, hips & thighs',
-  exercises: [
-   {name:'Split squat / lunge (Smith or guided)', reps:'3 x 10-12 each leg', note:'Front knee over mid-foot, torso tall. Feel front-leg glute and quad.'},
-   {name:'Hip thrust (machine or Smith)', reps:'3-4 x 10-12', note:'Chin tucked, ribs down. Squeeze glutes hard at top; no lower-back arch.'},
-   {name:'Step-up (box, light DBs or body-weight)', reps:'2-3 x 10-12 each leg', note:'Step up through whole front foot and heel. Feel glute and quad of front leg.'},
-   {name:'Leg curl (2nd exposure)', reps:'2-3 x 12-15', note:'Same cues as Day 2; smooth control, no jerking.'},
-   {name:'Hip abduction machine (2nd exposure)', reps:'3 x 15-20', note:'Same cues as Day 2; focus on outer-hip burn.'},
-   {name:'Calf raise machine', reps:'2-3 x 15-20', note:'Same cues as Day 2; slow up and down.'}
-  ],
-  core: [
-   {name:'Leg raises (lying or chair)', reps:'3 x 10-15', note:'Press lower back into bench, lift legs slowly. Feel lower abs; bend knees if needed.'}
-  ]
- },
- Day6: {
-  focus: 'Arms + core (shape, not bulk)',
-  exercises: [
-   {name:'Triceps rope pushdown', reps:'3 x 10-12', note:'Part of a superset. Do a set here, then move to overhead extension before resting.'},
-   {name:'Overhead cable triceps extension', reps:'3 x 12-15', note:'After each pushdown set, go straight into this, then rest 60–90s.'},
-   {name:'Cable or machine biceps curl', reps:'2-3 x 10-12', note:'Moderate-light. Elbows still, curl smoothly; avoid swinging.'},
-   {name:'Hammer curl (DB or cable rope)', reps:'2 x 12-15', note:'Palms facing in. Light weight; stop before arms feel too pumped.'}
-  ],
-  core: [
-   {name:'Cable crunch', reps:'3 x 12-15', note:'Upper abs focus; ribs down and curl, don’t hinge at hips only.'},
-   {name:'Side plank', reps:'2 x 20-30s each side', note:'Side of waist and shoulder working; breathe steadily.'},
-   {name:'Bicycle crunches or cross-body climbers', reps:'2 x 20 each side', note:'Slow and controlled; rotate through ribcage, feel obliques.'}
-  ]
- },
- Day7: {
-  focus: 'Rest / recovery',
-  exercises: [
-   {name:'Walk / yoga / foam-roll', reps:'20-30 min easy', note:'Gentle movement, focus on relaxation and blood flow.'}
-  ],
-  core: []
- }
+// ===== CONFIG =====
+
+// Mon–Sun order
+const dayOrder = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+// GYM PLAN (fixed structure)
+const gymPlan = {
+  Mon: {
+    focus: 'Push & triceps (upper, slim focus)',
+    exercises: [
+      {name:'Machine chest press', reps:'3 x 10-12', note:'Moderate load. Stop 2–3 reps before failure; gentle chest work, not a huge pump.'},
+      {name:'Pec deck / chest fly', reps:'2-3 x 12-15', note:'Light. Focus on stretch and squeeze, elbows soft.'},
+      {name:'Machine shoulder press', reps:'3 x 10-12', note:'Controlled. If shoulders feel too pumped or wide, keep this at 2 sets.'},
+      {name:'Lateral raise machine / cables', reps:'2-3 x 15-20', note:'Very light. Lift to just below shoulder height; neck relaxed.'},
+      {name:'Triceps rope pushdown', reps:'3 x 10-12', note:'Elbows by sides. Straighten arms and squeeze back of upper arm.'},
+      {name:'Overhead cable triceps extension', reps:'2-3 x 12-15', note:'Light-moderate. Elbows pointing up; feel stretch and squeeze along back of arm.'}
+    ],
+    core: [
+      {name:'Cable crunch', reps:'3 x 12-15', note:'Kneeling or standing. Ribs down, curl from upper abs; don’t just pull with arms.'}
+    ],
+    functional: [
+      {name:'Battle ropes (waves)', reps:'3 x 20–30s', note:'Light-moderate. Stand tall, move ropes in waves; breathe steadily.'},
+      {name:'Incline treadmill / stepper intervals', reps:'3–4 x 1–2 min', note:'Slightly faster than normal incline walk, still able to talk.'},
+      {name:'Push-ups (incline or knee)', reps:'2–3 x 8–12', note:'Hands on bench or bar if needed. Feel chest and triceps.'}
+    ]
+  },
+
+  Tue: {
+    focus: 'Lower body & glutes (machines)',
+    exercises: [
+      {name:'Leg press', reps:'3-4 x 12-15', note:'Feet shoulder-width, push through heels. Feel quads and glutes; no knee pain.'},
+      {name:'Romanian deadlift (Smith/DB)', reps:'3 x 10-12', note:'Soft knees, hinge at hips. Feel hamstring stretch and glutes, back neutral.'},
+      {name:'Leg curl (seated or lying)', reps:'3 x 12-15', note:'Curl heels toward seat, pause at bottom. Feel back of thighs, not knees.'},
+      {name:'Leg extension (light, optional)', reps:'2-3 x 12-15', note:'Light. Only if knees feel good; stop if you feel joint discomfort.'},
+      {name:'Hip abduction machine', reps:'3 x 15-20', note:'Sit tall, open knees smoothly. Feel outer hips/glutes.'},
+      {name:'Calf raise machine (standing/seated)', reps:'3 x 15-20', note:'Rise slowly onto toes, full stretch at bottom. Feel calves only.'}
+    ],
+    core: [
+      {name:'Front plank', reps:'3 x 20-30s', note:'Body in straight line; feel deep abs, not lower back.'},
+      {name:'Side plank', reps:'2 x 20-30s each side', note:'Hips stacked, feel side of waist and shoulder.'}
+    ],
+    functional: [
+      {name:'Walking lunges', reps:'2–3 x 10–12 steps each leg', note:'Body-weight or very light DBs. Short, controlled steps.'},
+      {name:'Box step-ups (body-weight)', reps:'2 x 10 each leg', note:'Step through whole front foot and heel.'},
+      {name:'Ski-erg or rower (easy intervals)', reps:'4–6 x 30s / 30–60s easy', note:'Comfortable pace; smooth pulls.'}
+    ]
+  },
+
+  Wed: {
+    focus: 'Rest / light movement',
+    exercises: [
+      {name:'Mobility circuit', reps:'2-3 easy rounds', note:'Cat-cow, thread-the-needle, world’s greatest stretch. Slow, controlled.'},
+      {name:'Walk / yoga / stretching', reps:'20-30 min easy', note:'Gentle pace. Relax, focus on breathing and recovery.'}
+    ],
+    core: [],
+    functional: []
+  },
+
+  Thu: {
+    focus: 'Back, posture & arms',
+    exercises: [
+      {name:'Lat pulldown (medium/wide grip)', reps:'3 x 10-12', note:'Lean slightly back, pull bar to upper chest. Feel lats and mid-back, not neck.'},
+      {name:'Seated cable row / machine row', reps:'3 x 10-12', note:'Torso upright, pull handle to belly. Squeeze shoulder blades.'},
+      {name:'Face pull (cable)', reps:'3 x 12-15', note:'Rope to face, elbows high. Feel rear delts/upper-back.'},
+      {name:'Reverse fly machine', reps:'2-3 x 12-15', note:'Light. Open arms in wide arc; feel rear shoulders.'},
+      {name:'Biceps curl (cable or machine)', reps:'2-3 x 10-12', note:'Elbows under shoulders, curl with control.'},
+      {name:'Triceps pushdown (light)', reps:'2 x 12-15', note:'Light. Gentle squeeze; extra shape work, not heavy strength.'}
+    ],
+    core: [
+      {name:'Pallof press OR torso rotation', reps:'2-3 x 12-15 each side', note:'Light. Resist twisting (Pallof) or rotate slowly; feel obliques.'}
+    ],
+    functional: [
+      {name:'Farmer’s carry (DBs)', reps:'2–3 x 20–30m', note:'Stand tall, shoulders down and back. Feel grip and core.'},
+      {name:'Band pull-apart + face-pull combo', reps:'2–3 x 12–15 each', note:'Light band. Slow, controlled; posture focus.'},
+      {name:'Rowing machine intervals', reps:'4–6 x 30–45s / easy 45–60s', note:'Moderate pace, smooth strokes.'}
+    ]
+  },
+
+  Fri: {
+    focus: 'Glutes, hips & thighs',
+    exercises: [
+      {name:'Split squat / lunge (Smith or guided)', reps:'3 x 10-12 each leg', note:'Front knee over mid-foot, torso tall. Feel front-leg glute and quad.'},
+      {name:'Hip thrust (machine or Smith)', reps:'3-4 x 10-12', note:'Chin tucked, ribs down. Squeeze glutes hard at top.'},
+      {name:'Step-up (box, light DBs or body-weight)', reps:'2-3 x 10-12 each leg', note:'Step up through whole front foot and heel.'},
+      {name:'Leg curl (2nd exposure)', reps:'2-3 x 12-15', note:'Same cues as Tue; smooth control.'},
+      {name:'Hip abduction machine (2nd exposure)', reps:'3 x 15-20', note:'Focus on outer-hip burn.'},
+      {name:'Calf raise machine', reps:'2-3 x 15-20', note:'Slow up and down; full stretch.'}
+    ],
+    core: [
+      {name:'Leg raises (lying or chair)', reps:'3 x 10-15', note:'Press lower back into bench, lift legs slowly. Bend knees if needed.'}
+    ],
+    functional: [
+      {name:'Mini-band lateral walks', reps:'2–3 x 12–15 steps each way', note:'Band above knees/ankles. Small, controlled steps.'},
+      {name:'Walking lunges', reps:'2 x 10–12 each leg', note:'Body-weight. Only if knees feel okay.'},
+      {name:'Kettlebell deadlift (light)', reps:'2–3 x 10–12', note:'Weight between feet, hinge at hips; back neutral.'}
+    ]
+  },
+
+  Sat: {
+    focus: 'Arms + core (shape, not bulk)',
+    exercises: [
+      {name:'Triceps rope pushdown', reps:'3 x 10-12', note:'Part of superset; straight arms and squeeze at bottom.'},
+      {name:'Overhead cable triceps extension', reps:'3 x 12-15', note:'After each pushdown, go straight into this.'},
+      {name:'Cable or machine biceps curl', reps:'2-3 x 10-12', note:'Moderate-light. Elbows still, curl smoothly.'},
+      {name:'Hammer curl (DB or cable rope)', reps:'2 x 12-15', note:'Palms facing in, light weight.'}
+    ],
+    core: [
+      {name:'Cable crunch', reps:'3 x 12-15', note:'Upper abs focus; ribs down and curl.'},
+      {name:'Bicycle crunches or cross-body climbers', reps:'2 x 20 each side', note:'Slow and controlled; rotate through ribcage.'}
+    ],
+    functional: [
+      {name:'Battle ropes (waves)', reps:'4–6 x 20–30s', note:'Great for arms and conditioning; keep shoulders down.'},
+      {name:'Light sled / treadmill push', reps:'3–4 short pushes', note:'Comfortable load; steady drive.'},
+      {name:'Mountain climbers / cross-body climbers', reps:'3 x 20 each side', note:'Hands under shoulders, hips stable.'}
+    ]
+  },
+
+  Sun: {
+    focus: 'Rest / recovery',
+    exercises: [
+      {name:'Walk / yoga / foam-roll', reps:'20-30 min easy', note:'Gentle movement; focus on relaxation and blood flow.'}
+    ],
+    core: [],
+    functional: []
+  }
 };
 
-const days = Object.keys(plan);
-const tabsDiv = document.getElementById('tabs');
+// DIET PLAN – sections fixed, meals editable per day
+const dietSections = [
+  'EARLY MORNING (before workout)',
+  'AFTER WORKOUT',
+  'SNACK 1 (before leaving for office)',
+  'MM (after you reach office)',
+  'LUNCH',
+  'POST LUNCH (in office)',
+  'BLACK COFFEE (evening – optional)',
+  'SNACK 1 (evening protein)',
+  'SNACK 2 (before leaving for home)',
+  'DINNER',
+  'POST DINNER'
+];
+
+// For Diet, we create generic entries per day; meals typed in by you in inputs.
+const dietPlan = {};
+dayOrder.forEach(day => {
+  dietPlan[day] = {
+    focus: 'Diet – ' + day,
+    exercises: dietSections.map(label => ({
+      name: label,
+      reps: 'Planned',
+      note: '' // note becomes editable text input in UI
+    })),
+    core: [],
+    functional: []
+  };
+});
+
+// ===== STATE =====
+let currentMode = 'gym'; // 'gym' or 'diet'
+let currentDay  = 'Mon';
+
+const tabsDiv    = document.getElementById('tabs');
 const trackerDiv = document.getElementById('tracker');
 
-function createTab(day, index) {
+function getPlan() {
+  return currentMode === 'gym' ? gymPlan : dietPlan;
+}
+
+// ===== RENDERING =====
+function createTab(day) {
   const tab = document.createElement('div');
-  tab.className = 'tab' + (index === 0 ? ' active' : '');
+  tab.className = 'tab' + (day === currentDay ? ' active' : '');
   tab.textContent = day;
   tab.dataset.day = day;
   tab.onclick = () => setActiveDay(day);
@@ -139,51 +226,74 @@ function createTab(day, index) {
 
 function createExerciseRow(day, ex, isCore) {
   const tr = document.createElement('tr');
-  const safeName = (day + '-' + (isCore ? 'core-' : '') + ex.name).replace(/[\s\/\-']/g,'_');
+  const safeName = (currentMode + '-' + day + '-' + (isCore ? 'core-' : '') + ex.name).replace(/[\s\/\-']/g,'_');
+
   const tdName = document.createElement('td');
-  tdName.innerHTML = ex.name + '<div class="small-note">' + (ex.note || '') + '</div>';
+  tdName.innerHTML = ex.name + (currentMode === 'gym' && ex.note ? '<div class="small-note">' + ex.note + '</div>' : '');
   tr.appendChild(tdName);
+
   const tdReps = document.createElement('td');
-  tdReps.textContent = ex.reps;
+  if (currentMode === 'diet') {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'meal-input';
+    inp.placeholder = 'Type today\'s meal / portion';
+    tdReps.appendChild(inp);
+  } else {
+    tdReps.textContent = ex.reps || '';
+  }
   tr.appendChild(tdReps);
+
   const tdStatus = document.createElement('td');
   const statusDiv = document.createElement('div');
   statusDiv.className = 'status-group';
-  ['Done','Part','Skip'].forEach(val => {
+
+  const gymOptions  = ['Done','Part','Skip'];
+  const dietOptions = ['Followed & satisfied','Followed & not satisfied','Ate something else'];
+  const options = currentMode === 'gym' ? gymOptions : dietOptions;
+
+  options.forEach(val => {
     const label = document.createElement('label');
     label.innerHTML = '<input type="radio" name="' + safeName + '" value="' + val + '"> ' + val;
     statusDiv.appendChild(label);
   });
   tdStatus.appendChild(statusDiv);
   tr.appendChild(tdStatus);
+
   return tr;
 }
 
-function createDaySection(day, index) {
-  const data = plan[day];
+function createDaySection(day) {
+  const data = getPlan()[day];
   const section = document.createElement('div');
-  section.className = 'day-section' + (index === 0 ? ' active' : '');
-  section.id = 'section-' + day;
+  section.className = 'day-section' + (day === currentDay ? ' active' : '');
+  section.id = currentMode + '-section-' + day;
+
   const h2 = document.createElement('h2');
   h2.textContent = day;
   section.appendChild(h2);
+
   const focus = document.createElement('div');
   focus.className = 'focus';
-  focus.textContent = 'Focus: ' + data.focus;
+  focus.textContent = 'Focus: ' + (data.focus || '');
   section.appendChild(focus);
 
-  const table = document.createElement('table');
-  const thead = document.createElement('thead');
-  thead.innerHTML = '<tr><th>Exercise</th><th>Sets / Reps</th><th>Status</th></tr>';
-  table.appendChild(thead);
-  const tbody = document.createElement('tbody');
-  data.exercises.forEach(ex => {
-    tbody.appendChild(createExerciseRow(day, ex, false));
-  });
-  table.appendChild(tbody);
-  section.appendChild(table);
+  // Main table
+  if (data.exercises && data.exercises.length) {
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>' + (currentMode === 'diet' ? 'Meal / Slot' : 'Exercise / Item') + '</th><th>' + (currentMode === 'diet' ? 'What you ate' : 'Sets / Reps') + '</th><th>Status</th></tr>';
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    data.exercises.forEach(ex => {
+      tbody.appendChild(createExerciseRow(day, ex, false));
+    });
+    table.appendChild(tbody);
+    section.appendChild(table);
+  }
 
-  if (data.core && data.core.length) {
+  // Core / finisher (gym only for now)
+  if (currentMode === 'gym' && data.core && data.core.length) {
     const coreTitle = document.createElement('h3');
     coreTitle.textContent = 'Core / finisher';
     section.appendChild(coreTitle);
@@ -199,97 +309,152 @@ function createDaySection(day, index) {
     section.appendChild(coreTable);
   }
 
-  const cardioTitle = document.createElement('h3');
-  cardioTitle.textContent = 'Incline treadmill (10–15 min, most training days)';
-  section.appendChild(cardioTitle);
-  const cardioTable = document.createElement('table');
-  const cardioThead = document.createElement('thead');
-  cardioThead.innerHTML = '<tr><th>Activity</th><th>Status</th></tr>';
-  cardioTable.appendChild(cardioThead);
-  const cardioTbody = document.createElement('tbody');
-  const cTr = document.createElement('tr');
-  const cName = 'Incline treadmill walk/jog';
-  const cSafeName = (day + '-cardio-' + cName).replace(/[\s\/\-']/g,'_');
-  cTr.innerHTML = '<td>' + cName + '<div class="small-note">Moderate pace on 5–8% incline. You should be able to talk but feel your heart rate up.</div></td>';
-  const cTd = document.createElement('td');
-  const cDiv = document.createElement('div');
-  cDiv.className = 'status-group';
-  ['Done','Part','Skip'].forEach(v => {
-    const label = document.createElement('label');
-    label.innerHTML = '<input type="radio" name="' + cSafeName + '" value="' + v + '"> ' + v;
-    cDiv.appendChild(label);
-  });
-  cTd.appendChild(cDiv);
-  cTr.appendChild(cTd);
-  cardioTbody.appendChild(cTr);
-  cardioTable.appendChild(cardioTbody);
-  section.appendChild(cardioTable);
+  // Functional (gym only)
+  if (currentMode === 'gym' && data.functional && data.functional.length) {
+    const funcTitle = document.createElement('h3');
+    funcTitle.textContent = 'Functional (optional – complements today’s focus)';
+    section.appendChild(funcTitle);
+    const funcTable = document.createElement('table');
+    const funcThead = document.createElement('thead');
+    funcThead.innerHTML = '<tr><th>Exercise</th><th>Sets / Reps</th><th>Status</th></tr>';
+    funcTable.appendChild(funcThead);
+    const funcTbody = document.createElement('tbody');
+    data.functional.forEach(ex => {
+      funcTbody.appendChild(createExerciseRow(day, ex, false));
+    });
+    funcTable.appendChild(funcTbody);
+    section.appendChild(funcTable);
+  }
 
+  // Cardio block (gym mode only)
+  if (currentMode === 'gym') {
+    const cardioTitle = document.createElement('h3');
+    cardioTitle.textContent = 'Incline treadmill (10–15 min, most training days)';
+    section.appendChild(cardioTitle);
+    const cardioTable = document.createElement('table');
+    const cardioThead = document.createElement('thead');
+    cardioThead.innerHTML = '<tr><th>Activity</th><th>Status</th></tr>';
+    cardioTable.appendChild(cardioThead);
+    const cardioTbody = document.createElement('tbody');
+    const cTr = document.createElement('tr');
+    const cName = 'Incline treadmill walk/jog';
+    const cSafeName = (currentMode + '-' + day + '-cardio-' + cName).replace(/[\s\/\-']/g,'_');
+    cTr.innerHTML = '<td>' + cName + '<div class="small-note">Moderate pace on 5–8% incline. You should be able to talk but feel heart rate up.</div></td>';
+    const cTd = document.createElement('td');
+    const cDiv = document.createElement('div');
+    cDiv.className = 'status-group';
+    ['Done','Part','Skip'].forEach(v => {
+      const label = document.createElement('label');
+      label.innerHTML = '<input type="radio" name="' + cSafeName + '" value="' + v + '"> ' + v;
+      cDiv.appendChild(label);
+    });
+    cTd.appendChild(cDiv);
+    cTr.appendChild(cTd);
+    cardioTbody.appendChild(cTr);
+    cardioTable.appendChild(cardioTbody);
+    section.appendChild(cardioTable);
+  }
+
+  // Notes
   const notesTitle = document.createElement('h3');
   notesTitle.textContent = 'Notes';
   section.appendChild(notesTitle);
   const notesArea = document.createElement('textarea');
   notesArea.className = 'note';
-  notesArea.name = day + '-notes';
-  notesArea.placeholder = 'How did today feel? Energy, cycle phase, soreness, weights, mood, etc.';
+  notesArea.name = currentMode + '-' + day + '-notes';
+  notesArea.placeholder = currentMode === 'gym'
+    ? 'How did today feel? Energy, cycle phase, soreness, weights, mood, etc.'
+    : 'How did today feel? Hunger, cravings, digestion, social meals, etc.';
   section.appendChild(notesArea);
 
   trackerDiv.appendChild(section);
 }
 
-// Build tabs and sections
-days.forEach((d, i) => { createTab(d, i); createDaySection(d, i); });
+function buildUI() {
+  tabsDiv.innerHTML = '';
+  trackerDiv.innerHTML = '';
+  const plan = getPlan();
+  dayOrder.forEach(d => {
+    createTab(d);
+    createDaySection(d);
+  });
+}
 
 function setActiveDay(day) {
+  currentDay = day;
   document.querySelectorAll('.tab').forEach(t => {
     t.classList.toggle('active', t.dataset.day === day);
   });
   document.querySelectorAll('.day-section').forEach(sec => {
-    sec.classList.toggle('active', sec.id === 'section-' + day);
+    sec.classList.toggle('active', sec.id === currentMode + '-section-' + day);
   });
 }
 
+function setMode(mode) {
+  if (mode === currentMode) return;
+  currentMode = mode;
+  document.getElementById('btn-gym').classList.toggle('active', mode === 'gym');
+  document.getElementById('btn-diet').classList.toggle('active', mode === 'diet');
+  buildUI();
+}
+
+// Initial render
+buildUI();
+
+// ===== SUMMARY COPY =====
 function copySummary() {
   const activeTab = document.querySelector('.tab.active');
   if (!activeTab) { alert('No day selected'); return; }
   const day = activeTab.dataset.day;
-  const section = document.getElementById('section-' + day);
+  const section = document.getElementById(currentMode + '-section-' + day);
 
   let lines = [];
   lines.push('Daily check-in — ' + day);
+  lines.push('Mode: ' + (currentMode === 'gym' ? 'Gym' : 'Diet'));
   const focusText = section.querySelector('.focus')?.textContent || '';
   if (focusText) {
     lines.push('Session: ' + focusText.replace('Focus: ','').trim());
   }
 
-  lines.push('Exercises:');
+  lines.push('Items:');
   section.querySelectorAll('table').forEach(table => {
     const titleEl = table.previousElementSibling;
     const isCore = titleEl && titleEl.tagName === 'H3' && titleEl.textContent.toLowerCase().includes('core');
+    const isFunc = titleEl && titleEl.tagName === 'H3' && titleEl.textContent.toLowerCase().includes('functional');
     const isCardio = titleEl && titleEl.tagName === 'H3' && titleEl.textContent.toLowerCase().includes('incline');
+
     table.querySelectorAll('tbody tr').forEach(tr => {
       const nameCell = tr.cells[0];
       const repsCell = tr.cells[1] || null;
       const radios = tr.querySelectorAll('input[type="radio"]');
-      let status = 'skip';
+      let status = currentMode === 'gym' ? 'skip' : 'no selection';
       radios.forEach(r => { if (r.checked) status = r.value.toLowerCase(); });
       let name = nameCell ? nameCell.childNodes[0].textContent.trim() : '';
       if (!name) return;
+
+      let detail = '';
+      if (currentMode === 'diet') {
+        const inp = repsCell?.querySelector('input.meal-input');
+        detail = inp && inp.value.trim() ? ' – ' + inp.value.trim() : '';
+      } else {
+        const reps = repsCell ? repsCell.textContent.trim() : '';
+        if (reps) detail = ' [' + reps + ']';
+      }
+
       if (isCardio) {
         lines.push('- Cardio: ' + name + ' (' + status + ')');
       } else if (isCore) {
-        lines.push('- Core: ' + name + ' (' + status + ')');
+        lines.push('- Core: ' + name + detail + ': ' + status);
+      } else if (isFunc) {
+        lines.push('- Functional: ' + name + detail + ': ' + status);
       } else {
-        const reps = repsCell ? repsCell.textContent.trim() : '';
-        lines.push('- ' + name + (reps ? ' [' + reps + ']' : '') + ': ' + status);
+        lines.push('- ' + name + detail + ': ' + status);
       }
     });
   });
 
   const notes = section.querySelector('textarea.note')?.value.trim();
-  if (notes) {
-    lines.push('Notes: ' + notes);
-  }
+  if (notes) lines.push('Notes: ' + notes);
 
   const summary = lines.join('\n');
   if (navigator.clipboard && navigator.clipboard.writeText) {
