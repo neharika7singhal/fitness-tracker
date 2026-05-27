@@ -2,157 +2,34 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Simple Fitness Tabs</title>
+<title>Weekly Fitness Tracker</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;margin:10px;background:#fafafa;}
 h1 {color:#2c3e50;font-size:20px;margin-bottom:6px;}
 .small {font-size:11px;color:#666;}
-.tab-container {display:flex;border-bottom:1px solid #ddd;margin:8px 0 10px;}
-.tab {padding:6px 10px;cursor:pointer;border:1px solid #ddd;border-bottom:none;border-radius:6px 6px 0 0;background:#f0f2f5;margin-right:4px;font-size:11px;}
+.tab-container {display:flex;overflow-x:auto;border-bottom:1px solid #ddd;margin:8px 0 10px;}
+.tab {flex:0 0 auto;padding:6px 10px;cursor:pointer;border:1px solid #ddd;border-bottom:none;border-radius:6px 6px 0 0;background:#f0f2f5;margin-right:4px;font-size:11px;white-space:nowrap;}
 .tab.active {background:#ffffff;font-weight:600;}
-.section {display:none;padding:10px;background:#fff;border:1px solid #ddd;border-radius:0 6px 6px 6px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
-.section.active {display:block;}
-h2 {font-size:16px;margin:0 0 4px;}
-table {width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px;}
+.day-section {display:none;padding:10px;background:#fff;border:1px solid #ddd;border-radius:0 6px 6px 6px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+.day-section.active {display:block;}
+h2 {font-size:16px;margin:0 0 2px;}
+h3 {font-size:13px;margin:10px 0 4px;}
+table {width:100%;border-collapse:collapse;font-size:11px;}
 th,td {border:1px solid #eee;padding:5px 6px;text-align:left;vertical-align:top;}
 th {background:#f3f6f7;font-weight:600;}
-textarea {width:100%;min-height:60px;font-size:11px;padding:6px;box-sizing:border-box;border:1px solid #ddd;border-radius:4px;}
+.status-group {display:flex;gap:6px;flex-wrap:wrap;font-size:11px;}
+.status-group label {font-weight:normal;}
+input[type="radio"] {margin-right:2px;}
+textarea.note,textarea.meal-edit {width:100%;min-height:60px;font-size:11px;padding:6px;box-sizing:border-box;border:1px solid #ddd;border-radius:4px;}
+textarea.meal-edit {min-height:54px;}
 .actions {margin-top:10px;}
-button {padding:7px 10px;background:#3498db;color:#fff;border:none;cursor:pointer;border-radius:4px;font-size:11px;}
+button {padding:7px 10px;background:#3498db;color:#fff;border:none;cursor:pointer;margin-right:4px;border-radius:4px;font-size:11px;}
 button:hover {background:#2980b9;}
+.focus {font-size:11px;color:#555;margin-bottom:6px;}
 </style>
 </head>
 <body>
-<h1>Weekly Fitness</h1>
+<h1>Weekly Fitness Tracker</h1>
 <p class="small">
-  Two tabs: Gym plan and Diet plan. Diet fields auto-save in this browser. Use the button below to copy text for feedback.
-</p>
-
-<div class="tab-container">
-  <div class="tab active" data-target="gym">Gym</div>
-  <div class="tab" data-target="diet">Diet</div>
-</div>
-
-<!-- GYM TAB -->
-<div id="gym" class="section active">
-  <h2>Gym – weekly focus</h2>
-  <table>
-    <thead><tr><th>Day</th><th>Focus</th></tr></thead>
-    <tbody>
-      <tr><td>Mon</td><td>Lower body + glutes</td></tr>
-      <tr><td>Tue</td><td>Rest / walking</td></tr>
-      <tr><td>Wed</td><td>Upper pull + posture</td></tr>
-      <tr><td>Thu</td><td>Lower body 2 + waist</td></tr>
-      <tr><td>Fri</td><td>Upper push + arms</td></tr>
-      <tr><td>Sat</td><td>Conditioning + core</td></tr>
-      <tr><td>Sun</td><td>Active recovery</td></tr>
-    </tbody>
-  </table>
-  <textarea id="gym-notes" placeholder="Notes about workouts, energy, periods, travel, etc."></textarea>
-</div>
-
-<!-- DIET TAB -->
-<div id="diet" class="section">
-  <h2>Diet – Week 2 (editable, auto-save)</h2>
-  <table>
-    <thead><tr><th>Day</th><th>Plan</th></tr></thead>
-    <tbody>
-      <tr>
-        <td>Mon</td>
-        <td><textarea data-day="Mon">Paste or type Monday plan here (early morning, MM, lunch, snacks, dinner)</textarea></td>
-      </tr>
-      <tr>
-        <td>Tue</td>
-        <td><textarea data-day="Tue">Paste or type Tuesday plan here</textarea></td>
-      </tr>
-      <tr>
-        <td>Wed</td>
-        <td><textarea data-day="Wed">Paste or type Wednesday plan here</textarea></td>
-      </tr>
-      <tr>
-        <td>Thu</td>
-        <td><textarea data-day="Thu">Paste or type Thursday plan here</textarea></td>
-      </tr>
-      <tr>
-        <td>Fri</td>
-        <td><textarea data-day="Fri">Paste or type Friday plan here</textarea></td>
-      </tr>
-      <tr>
-        <td>Sat</td>
-        <td><textarea data-day="Sat">Paste or type Saturday plan here</textarea></td>
-      </tr>
-      <tr>
-        <td>Sun</td>
-        <td><textarea data-day="Sun">Paste or type Sunday plan here</textarea></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-<div class="actions">
-  <button id="copy-feedback">Copy for feedback</button>
-</div>
-
-<script>
-// ---- Tabs ----
-const tabs = document.querySelectorAll('.tab');
-const sections = document.querySelectorAll('.section');
-
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    const target = tab.dataset.target;
-    tabs.forEach(t => t.classList.remove('active'));
-    sections.forEach(s => s.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById(target).classList.add('active');
-  });
-});
-
-// ---- Diet autosave ----
-const MEAL_KEY = 'dietWeek2';
-
-function loadMeals() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(MEAL_KEY)) || {};
-    document.querySelectorAll('#diet textarea[data-day]').forEach(area => {
-      const d = area.dataset.day;
-      if (saved[d] !== undefined) area.value = saved[d];
-    });
-  } catch(e) {
-    console.error(e);
-  }
-}
-
-function saveMeals() {
-  const data = {};
-  document.querySelectorAll('#diet textarea[data-day]').forEach(area => {
-    data[area.dataset.day] = area.value;
-  });
-  localStorage.setItem(MEAL_KEY, JSON.stringify(data));
-}
-
-document.querySelectorAll('#diet textarea[data-day]').forEach(area => {
-  area.addEventListener('input', saveMeals);
-});
-
-loadMeals();
-
-// ---- Copy feedback ----
-document.getElementById('copy-feedback').addEventListener('click', async () => {
-  const gymNotes = document.getElementById('gym-notes').value.trim();
-  const dietData = JSON.parse(localStorage.getItem(MEAL_KEY) || '{}');
-  let text = 'Gym notes: ' + (gymNotes || 'none') + '\n\nDiet plan:\n';
-  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(day => {
-    text += day + ': ' + (dietData[day] || '') + '\n\n';
-  });
-  try {
-    await navigator.clipboard.writeText(text);
-    alert('Copied. Paste here for feedback.');
-  } catch(e) {
-    alert('Could not copy automatically (browser blocked). You can still select and copy text manually if needed.');
-  }
-});
-</script>
-</body>
-</html>
+  D
