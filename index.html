@@ -11,25 +11,177 @@ h1 {color:#2c3e50;font-size:20px;margin-bottom:6px;}
 .tab-container {display:flex;overflow-x:auto;border-bottom:1px solid #ddd;margin:8px 0 10px;}
 .tab {flex:0 0 auto;padding:6px 10px;cursor:pointer;border:1px solid #ddd;border-bottom:none;border-radius:6px 6px 0 0;background:#f0f2f5;margin-right:4px;font-size:11px;white-space:nowrap;}
 .tab.active {background:#ffffff;font-weight:600;}
-.day-section {display:none;padding:10px;background:#fff;border:1px solid #ddd;border-radius:0 6px 6px 6px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
-.day-section.active {display:block;}
-h2 {font-size:16px;margin:0 0 2px;}
+.section {display:none;padding:10px;background:#fff;border:1px solid #ddd;border-radius:0 6px 6px 6px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+.section.active {display:block;}
+h2 {font-size:16px;margin:0 0 4px;}
 h3 {font-size:13px;margin:10px 0 4px;}
-table {width:100%;border-collapse:collapse;font-size:11px;}
+table {width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px;}
 th,td {border:1px solid #eee;padding:5px 6px;text-align:left;vertical-align:top;}
 th {background:#f3f6f7;font-weight:600;}
-.status-group {display:flex;gap:6px;flex-wrap:wrap;font-size:11px;}
-.status-group label {font-weight:normal;}
-input[type="radio"] {margin-right:2px;}
-textarea.note,textarea.meal-edit {width:100%;min-height:60px;font-size:11px;padding:6px;box-sizing:border-box;border:1px solid #ddd;border-radius:4px;}
-textarea.meal-edit {min-height:54px;}
+textarea {width:100%;min-height:60px;font-size:11px;padding:6px;box-sizing:border-box;border:1px solid #ddd;border-radius:4px;}
 .actions {margin-top:10px;}
-button {padding:7px 10px;background:#3498db;color:#fff;border:none;cursor:pointer;margin-right:4px;border-radius:4px;font-size:11px;}
+button {padding:7px 10px;background:#3498db;color:#fff;border:none;cursor:pointer;border-radius:4px;font-size:11px;}
 button:hover {background:#2980b9;}
-.focus {font-size:11px;color:#555;margin-bottom:6px;}
 </style>
 </head>
 <body>
 <h1>Weekly Fitness Tracker</h1>
 <p class="small">
-  D
+  Daily tabs for gym focus + notes, and a Diet tab that auto-saves meals. Use the button to copy everything for feedback.
+</p>
+
+<div class="tab-container" id="tabs"></div>
+<div id="tracker"></div>
+
+<div class="actions">
+  <button id="copy-feedback">Copy for feedback</button>
+</div>
+
+<script>
+// ----- BASIC PLAN (FOCUS ONLY, SIMPLE) -----
+const workoutFocus = {
+  Mon: 'Lower body + glutes',
+  Tue: 'Rest / walking',
+  Wed: 'Upper pull + posture',
+  Thu: 'Lower body 2 + waist',
+  Fri: 'Upper push + arms',
+  Sat: 'Conditioning + core',
+  Sun: 'Active recovery'
+};
+
+// ----- BUILD TABS: Mon–Sun + Diet -----
+const days = Object.keys(workoutFocus);
+const allTabs = [...days, 'Diet'];
+
+const tabsDiv = document.getElementById('tabs');
+const trackerDiv = document.getElementById('tracker');
+
+allTabs.forEach((label, index) => {
+  // tab
+  const tab = document.createElement('div');
+  tab.className = 'tab' + (index === 0 ? ' active' : '');
+  tab.textContent = label;
+  tab.dataset.target = label;
+  tab.addEventListener('click', () => setActive(label));
+  tabsDiv.appendChild(tab);
+
+  // section
+  const section = document.createElement('div');
+  section.className = 'section' + (index === 0 ? ' active' : '');
+  section.id = 'section-' + label;
+
+  if (label !== 'Diet') {
+    // gym day
+    const h2 = document.createElement('h2');
+    h2.textContent = label;
+    section.appendChild(h2);
+
+    const p = document.createElement('p');
+    p.className = 'small';
+    p.textContent = 'Focus: ' + workoutFocus[label];
+    section.appendChild(p);
+
+    const notesLabel = document.createElement('h3');
+    notesLabel.textContent = 'Notes';
+    section.appendChild(notesLabel);
+
+    const notes = document.createElement('textarea');
+    notes.id = 'notes-' + label;
+    notes.placeholder = 'Write anything about this day (how workout went, periods, travel, etc.)';
+    section.appendChild(notes);
+  } else {
+    // diet tab
+    const h2 = document.createElement('h2');
+    h2.textContent = 'Diet – Week 2 (editable, auto-save)';
+    section.appendChild(h2);
+
+    const p = document.createElement('p');
+    p.className = 'small';
+    p.textContent = 'One box per day. Paste or type full plan (early morning, MM, lunch, snacks, dinner). Changes auto-save in this browser.';
+    section.appendChild(p);
+
+    const table = document.createElement('table');
+    table.innerHTML = '<thead><tr><th>Day</th><th>Meals</th></tr></thead>';
+    const tbody = document.createElement('tbody');
+
+    days.forEach(d => {
+      const tr = document.createElement('tr');
+      const tdDay = document.createElement('td');
+      tdDay.textContent = d;
+      const tdMeals = document.createElement('td');
+      const ta = document.createElement('textarea');
+      ta.dataset.day = d;
+      ta.placeholder = 'Paste/type ' + d + ' diet here';
+      tdMeals.appendChild(ta);
+      tr.appendChild(tdDay);
+      tr.appendChild(tdMeals);
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    section.appendChild(table);
+  }
+
+  trackerDiv.appendChild(section);
+});
+
+// ----- TAB SWITCHING -----
+function setActive(label) {
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.target === label);
+  });
+  document.querySelectorAll('.section').forEach(s => {
+    s.classList.toggle('active', s.id === 'section-' + label);
+  });
+}
+
+// ----- DIET AUTOSAVE -----
+const MEAL_KEY = 'dietWeek2_simple';
+
+function loadMeals() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(MEAL_KEY)) || {};
+    document.querySelectorAll('#section-Diet textarea[data-day]').forEach(ta => {
+      const d = ta.dataset.day;
+      if (saved[d] !== undefined) ta.value = saved[d];
+    });
+  } catch (e) {}
+}
+
+function saveMeals() {
+  const data = {};
+  document.querySelectorAll('#section-Diet textarea[data-day]').forEach(ta => {
+    data[ta.dataset.day] = ta.value;
+  });
+  localStorage.setItem(MEAL_KEY, JSON.stringify(data));
+}
+
+document.querySelectorAll('#section-Diet textarea[data-day]').forEach(ta => {
+  ta.addEventListener('input', saveMeals);
+});
+
+loadMeals();
+
+// ----- COPY FOR FEEDBACK -----
+document.getElementById('copy-feedback').addEventListener('click', async () => {
+  const dietData = JSON.parse(localStorage.getItem(MEAL_KEY) || '{}');
+  let text = 'Gym notes by day:\n';
+  days.forEach(d => {
+    const noteEl = document.getElementById('notes-' + d);
+    const note = noteEl ? noteEl.value.trim() : '';
+    text += d + ': ' + (note || 'none') + '\n';
+  });
+  text += '\nDiet plan (Week 2):\n';
+  days.forEach(d => {
+    text += d + ': ' + (dietData[d] || '') + '\n\n';
+  });
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('Copied. Paste here for feedback.');
+  } catch (e) {
+    alert('Could not copy automatically. You can still select and copy the text if needed.');
+  }
+});
+</script>
+</body>
+</html>
