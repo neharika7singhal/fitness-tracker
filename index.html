@@ -26,7 +26,7 @@ button:hover {background:#2980b9;}
 <body>
 <h1>Weekly Fitness</h1>
 <p class="small">
-  Two tabs: Gym plan and Diet plan. Edit diet; it auto-saves in this browser. Use the button below to copy feedback text.
+  Two tabs: Gym plan and Diet plan. Diet fields auto-save in this browser. Use the button below to copy text for feedback.
 </p>
 
 <div class="tab-container">
@@ -34,8 +34,9 @@ button:hover {background:#2980b9;}
   <div class="tab" data-target="diet">Diet</div>
 </div>
 
+<!-- GYM TAB -->
 <div id="gym" class="section active">
-  <h2>Gym plan</h2>
+  <h2>Gym – weekly focus</h2>
   <table>
     <thead><tr><th>Day</th><th>Focus</th></tr></thead>
     <tbody>
@@ -48,21 +49,43 @@ button:hover {background:#2980b9;}
       <tr><td>Sun</td><td>Active recovery</td></tr>
     </tbody>
   </table>
-  <textarea id="gym-notes" placeholder="Notes about workouts, soreness, energy, periods, travel, etc."></textarea>
+  <textarea id="gym-notes" placeholder="Notes about workouts, energy, periods, travel, etc."></textarea>
 </div>
 
+<!-- DIET TAB -->
 <div id="diet" class="section">
-  <h2>Diet plan (editable, auto-save)</h2>
+  <h2>Diet – Week 2 (editable, auto-save)</h2>
   <table>
-    <thead><tr><th>Day</th><th>Meals</th></tr></thead>
+    <thead><tr><th>Day</th><th>Plan</th></tr></thead>
     <tbody>
-      <tr><td>Mon</td><td><textarea data-day="Mon"></textarea></td></tr>
-      <tr><td>Tue</td><td><textarea data-day="Tue"></textarea></td></tr>
-      <tr><td>Wed</td><td><textarea data-day="Wed"></textarea></td></tr>
-      <tr><td>Thu</td><td><textarea data-day="Thu"></textarea></td></tr>
-      <tr><td>Fri</td><td><textarea data-day="Fri"></textarea></td></tr>
-      <tr><td>Sat</td><td><textarea data-day="Sat"></textarea></td></tr>
-      <tr><td>Sun</td><td><textarea data-day="Sun"></textarea></td></tr>
+      <tr>
+        <td>Mon</td>
+        <td><textarea data-day="Mon">Paste or type Monday plan here (early morning, MM, lunch, snacks, dinner)</textarea></td>
+      </tr>
+      <tr>
+        <td>Tue</td>
+        <td><textarea data-day="Tue">Paste or type Tuesday plan here</textarea></td>
+      </tr>
+      <tr>
+        <td>Wed</td>
+        <td><textarea data-day="Wed">Paste or type Wednesday plan here</textarea></td>
+      </tr>
+      <tr>
+        <td>Thu</td>
+        <td><textarea data-day="Thu">Paste or type Thursday plan here</textarea></td>
+      </tr>
+      <tr>
+        <td>Fri</td>
+        <td><textarea data-day="Fri">Paste or type Friday plan here</textarea></td>
+      </tr>
+      <tr>
+        <td>Sat</td>
+        <td><textarea data-day="Sat">Paste or type Saturday plan here</textarea></td>
+      </tr>
+      <tr>
+        <td>Sun</td>
+        <td><textarea data-day="Sun">Paste or type Sunday plan here</textarea></td>
+      </tr>
     </tbody>
   </table>
 </div>
@@ -72,7 +95,7 @@ button:hover {background:#2980b9;}
 </div>
 
 <script>
-// Tabs
+// ---- Tabs ----
 const tabs = document.querySelectorAll('.tab');
 const sections = document.querySelectorAll('.section');
 
@@ -86,8 +109,8 @@ tabs.forEach(tab => {
   });
 });
 
-// Diet autosave via localStorage
-const MEAL_KEY = 'simpleDietPlan_v1';
+// ---- Diet autosave ----
+const MEAL_KEY = 'dietWeek2';
 
 function loadMeals() {
   try {
@@ -96,7 +119,9 @@ function loadMeals() {
       const d = area.dataset.day;
       if (saved[d] !== undefined) area.value = saved[d];
     });
-  } catch(e) {}
+  } catch(e) {
+    console.error(e);
+  }
 }
 
 function saveMeals() {
@@ -113,19 +138,19 @@ document.querySelectorAll('#diet textarea[data-day]').forEach(area => {
 
 loadMeals();
 
-// Copy feedback text (gym notes + diet)
+// ---- Copy feedback ----
 document.getElementById('copy-feedback').addEventListener('click', async () => {
   const gymNotes = document.getElementById('gym-notes').value.trim();
   const dietData = JSON.parse(localStorage.getItem(MEAL_KEY) || '{}');
-  let text = 'Gym notes: ' + (gymNotes || 'none') + '\n\nDiet plan this week:\n';
+  let text = 'Gym notes: ' + (gymNotes || 'none') + '\n\nDiet plan:\n';
   ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(day => {
-    text += day + ': ' + (dietData[day] || '') + '\n';
+    text += day + ': ' + (dietData[day] || '') + '\n\n';
   });
   try {
     await navigator.clipboard.writeText(text);
     alert('Copied. Paste here for feedback.');
   } catch(e) {
-    alert('If copy fails, you can still select the text after we add a display box.');
+    alert('Could not copy automatically (browser blocked). You can still select and copy text manually if needed.');
   }
 });
 </script>
