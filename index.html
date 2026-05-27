@@ -2,405 +2,132 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Weekly Fitness Tracker</title>
+<title>Simple Fitness Tabs</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;margin:10px;background:#fafafa;}
 h1 {color:#2c3e50;font-size:20px;margin-bottom:6px;}
 .small {font-size:11px;color:#666;}
-.tab-container {display:flex;overflow-x:auto;border-bottom:1px solid #ddd;margin:8px 0 10px;}
-.tab {flex:0 0 auto;padding:6px 10px;cursor:pointer;border:1px solid #ddd;border-bottom:none;border-radius:6px 6px 0 0;background:#f0f2f5;margin-right:4px;font-size:11px;white-space:nowrap;}
-.tab.active {background:#fff;font-weight:600;}
-.day-section {display:none;padding:10px;background:#fff;border:1px solid #ddd;border-radius:0 6px 6px 6px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
-.day-section.active {display:block;}
-h2 {font-size:16px;margin:0 0 2px;}
-h3 {font-size:13px;margin:10px 0 4px;}
-table {width:100%;border-collapse:collapse;font-size:11px;}
+.tab-container {display:flex;border-bottom:1px solid #ddd;margin:8px 0 10px;}
+.tab {padding:6px 10px;cursor:pointer;border:1px solid #ddd;border-bottom:none;border-radius:6px 6px 0 0;background:#f0f2f5;margin-right:4px;font-size:11px;}
+.tab.active {background:#ffffff;font-weight:600;}
+.section {display:none;padding:10px;background:#fff;border:1px solid #ddd;border-radius:0 6px 6px 6px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+.section.active {display:block;}
+h2 {font-size:16px;margin:0 0 4px;}
+table {width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px;}
 th,td {border:1px solid #eee;padding:5px 6px;text-align:left;vertical-align:top;}
 th {background:#f3f6f7;font-weight:600;}
-.status-group {display:flex;gap:6px;flex-wrap:wrap;font-size:11px;}
-.status-group label {font-weight:normal;}
-input[type="radio"] {margin-right:2px;}
-textarea.note,textarea.meal-edit {width:100%;min-height:60px;font-size:11px;padding:6px;box-sizing:border-box;border:1px solid #ddd;border-radius:4px;}
-textarea.meal-edit {min-height:54px;}
+textarea {width:100%;min-height:60px;font-size:11px;padding:6px;box-sizing:border-box;border:1px solid #ddd;border-radius:4px;}
 .actions {margin-top:10px;}
-button {padding:7px 10px;background:#3498db;color:#fff;border:none;cursor:pointer;margin-right:4px;border-radius:4px;font-size:11px;}
+button {padding:7px 10px;background:#3498db;color:#fff;border:none;cursor:pointer;border-radius:4px;font-size:11px;}
 button:hover {background:#2980b9;}
-.focus {font-size:11px;color:#555;margin-bottom:6px;}
 </style>
 </head>
 <body>
-<h1>Weekly Fitness Tracker</h1>
+<h1>Weekly Fitness</h1>
 <p class="small">
-  Tap a tab to log that day's workout. Mark each exercise as Done / Part / Skip and add notes.
-  Diet is a separate tab and meal edits auto‑save.
+  Two tabs: Gym plan and Diet plan. Edit diet; it auto-saves in this browser. Use the button below to copy feedback text.
 </p>
 
-<div class="tab-container" id="tabs"></div>
-<div id="tracker"></div>
+<div class="tab-container">
+  <div class="tab active" data-target="gym">Gym</div>
+  <div class="tab" data-target="diet">Diet</div>
+</div>
+
+<div id="gym" class="section active">
+  <h2>Gym plan</h2>
+  <table>
+    <thead><tr><th>Day</th><th>Focus</th></tr></thead>
+    <tbody>
+      <tr><td>Mon</td><td>Lower body + glutes</td></tr>
+      <tr><td>Tue</td><td>Rest / walking</td></tr>
+      <tr><td>Wed</td><td>Upper pull + posture</td></tr>
+      <tr><td>Thu</td><td>Lower body 2 + waist</td></tr>
+      <tr><td>Fri</td><td>Upper push + arms</td></tr>
+      <tr><td>Sat</td><td>Conditioning + core</td></tr>
+      <tr><td>Sun</td><td>Active recovery</td></tr>
+    </tbody>
+  </table>
+  <textarea id="gym-notes" placeholder="Notes about workouts, soreness, energy, periods, travel, etc."></textarea>
+</div>
+
+<div id="diet" class="section">
+  <h2>Diet plan (editable, auto-save)</h2>
+  <table>
+    <thead><tr><th>Day</th><th>Meals</th></tr></thead>
+    <tbody>
+      <tr><td>Mon</td><td><textarea data-day="Mon"></textarea></td></tr>
+      <tr><td>Tue</td><td><textarea data-day="Tue"></textarea></td></tr>
+      <tr><td>Wed</td><td><textarea data-day="Wed"></textarea></td></tr>
+      <tr><td>Thu</td><td><textarea data-day="Thu"></textarea></td></tr>
+      <tr><td>Fri</td><td><textarea data-day="Fri"></textarea></td></tr>
+      <tr><td>Sat</td><td><textarea data-day="Sat"></textarea></td></tr>
+      <tr><td>Sun</td><td><textarea data-day="Sun"></textarea></td></tr>
+    </tbody>
+  </table>
+</div>
 
 <div class="actions">
-  <button onclick="submitFeedback()">Submit Feedback</button>
-  <button onclick="clearLog()">Clear</button>
-  <button onclick="resetMeals()">Reset Meals</button>
+  <button id="copy-feedback">Copy for feedback</button>
 </div>
 
 <script>
-const plan = {
-  Mon: {
-    focus: 'Lower body + glutes',
-    exercises: [
-      {name:'Leg press', reps:'3 x 12'},
-      {name:'Romanian deadlift', reps:'3 x 10-12'},
-      {name:'Leg curl', reps:'3 x 12-15'},
-      {name:'Hip thrust or glute bridge machine', reps:'3 x 12'},
-      {name:'Hip abduction', reps:'3 x 15-20'},
-      {name:'Calf raise', reps:'3 x 15-20'}
-    ],
-    core: [
-      {name:'Front plank', reps:'3 rounds'},
-      {name:'Side plank', reps:'2 rounds each side'}
-    ],
-    functional: [
-      {name:'Incline treadmill walk', reps:'15 min, speed 5, incline 10'}
-    ]
-  },
-  Tue: {
-    focus: 'Rest / recovery / walking',
-    exercises: [
-      {name:'Walk', reps:'7k-10k steps'},
-      {name:'Light stretching', reps:'10-15 min'},
-      {name:'Mobility work', reps:'Optional 10 min'}
-    ],
-    core: [],
-    functional: [
-      {name:'Easy walk', reps:'Optional, relaxed pace'}
-    ]
-  },
-  Wed: {
-    focus: 'Upper body pull + posture',
-    exercises: [
-      {name:'Lat pulldown', reps:'3 x 10-12'},
-      {name:'Seated row', reps:'3 x 10-12'},
-      {name:'Face pull', reps:'3 x 12-15'},
-      {name:'Reverse fly', reps:'2-3 x 12-15'},
-      {name:'Biceps curl', reps:'2-3 x 10-12'}
-    ],
-    core: [
-      {name:'Pallof press', reps:'3 x 12 each side'},
-      {name:'Side plank', reps:'2-3 rounds'}
-    ],
-    functional: [
-      {name:'Incline treadmill walk', reps:'15 min, speed 5, incline 10'}
-    ]
-  },
-  Thu: {
-    focus: 'Lower body 2 + waist focus',
-    exercises: [
-      {name:'Split squat or step-up', reps:'3 x 10 each leg'},
-      {name:'Smith squat / goblet squat', reps:'3 x 10-12'},
-      {name:'Leg curl', reps:'3 x 12-15'},
-      {name:'Hip abduction', reps:'3 x 15-20'},
-      {name:'Walking lunges', reps:'2 rounds'}
-    ],
-    core: [
-      {name:'Front plank', reps:'3 rounds'},
-      {name:'Dead bug or leg raises', reps:'2-3 rounds'}
-    ],
-    functional: [
-      {name:'Incline treadmill walk', reps:'15 min, speed 5, incline 10'}
-    ]
-  },
-  Fri: {
-    focus: 'Upper body push + arms',
-    exercises: [
-      {name:'Chest press', reps:'3 x 10-12'},
-      {name:'Shoulder press', reps:'3 x 10-12'},
-      {name:'Lateral raise', reps:'3 x 15'},
-      {name:'Triceps pushdown', reps:'3 x 12'},
-      {name:'Overhead triceps extension', reps:'2-3 x 12-15'}
-    ],
-    core: [
-      {name:'Pallof hold / press', reps:'2-3 rounds'},
-      {name:'Front plank', reps:'3 rounds'}
-    ],
-    functional: [
-      {name:'Incline treadmill walk', reps:'15 min, speed 5, incline 10'}
-    ]
-  },
-  Sat: {
-    focus: 'Conditioning + core',
-    exercises: [
-      {name:'Incline treadmill intervals or rower', reps:'20-25 min'},
-      {name:'Farmer’s carry', reps:'3 rounds'},
-      {name:'Mobility / stretching', reps:'10 min'}
-    ],
-    core: [
-      {name:'Side plank', reps:'2 rounds each side'},
-      {name:'Front plank', reps:'2 rounds'}
-    ],
-    functional: [
-      {name:'Optional long walk', reps:'20-30 min'}
-    ]
-  },
-  Sun: {
-    focus: 'Active recovery / yoga / easy walk',
-    exercises: [
-      {name:'Long easy walk', reps:'20-40 min'},
-      {name:'Stretch / yoga', reps:'10-20 min'}
-    ],
-    core: [],
-    functional: [
-      {name:'Recovery only', reps:'No hard training'}
-    ]
-  }
-};
+// Tabs
+const tabs = document.querySelectorAll('.tab');
+const sections = document.querySelectorAll('.section');
 
-// empty defaults; you fill them in and they auto-save
-const dietPlan = {
-  Mon:{breakfast:'',lunch:'',snack:'',dinner:''},
-  Tue:{breakfast:'',lunch:'',snack:'',dinner:''},
-  Wed:{breakfast:'',lunch:'',snack:'',dinner:''},
-  Thu:{breakfast:'',lunch:'',snack:'',dinner:''},
-  Fri:{breakfast:'',lunch:'',snack:'',dinner:''},
-  Sat:{breakfast:'',lunch:'',snack:'',dinner:''},
-  Sun:{breakfast:'',lunch:'',snack:'',dinner:''}
-};
-
-const workoutDays = Object.keys(plan);
-const tabs = [...workoutDays, 'Diet'];
-const tabsDiv = document.getElementById('tabs');
-const trackerDiv = document.getElementById('tracker');
-const logKey = 'fitnessLogTabs';
-const mealKey = 'fitnessMealEdits';
-
-function safeName(str){
-  return str.replace(/[\s/\-’'(),]+/g,'_');
-}
-
-function getMealData(){
-  try { return JSON.parse(localStorage.getItem(mealKey)) || {}; }
-  catch(e){ return {}; }
-}
-
-function saveMealData(data){
-  localStorage.setItem(mealKey, JSON.stringify(data));
-}
-
-function createTab(name,index){
-  const tab=document.createElement('div');
-  tab.className='tab'+(index===0?' active':'');
-  tab.textContent=name;
-  tab.dataset.day=name;
-  tab.onclick=()=>setActiveDay(name);
-  tabsDiv.appendChild(tab);
-}
-
-function createStatusCell(groupName){
-  const td=document.createElement('td');
-  const div=document.createElement('div');
-  div.className='status-group';
-  ['Done','Part','Skip'].forEach(v=>{
-    const label=document.createElement('label');
-    label.innerHTML='<input type="radio" name="'+groupName+'" value="'+v+'"> '+v;
-    div.appendChild(label);
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.target;
+    tabs.forEach(t => t.classList.remove('active'));
+    sections.forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(target).classList.add('active');
   });
-  td.appendChild(div);
-  return td;
-}
+});
 
-function createWorkoutSection(day,index){
-  const data=plan[day];
-  const section=document.createElement('div');
-  section.className='day-section'+(index===0?' active':'');
-  section.id='section-'+day;
+// Diet autosave via localStorage
+const MEAL_KEY = 'simpleDietPlan_v1';
 
-  const h2=document.createElement('h2');
-  h2.textContent=day;
-  section.appendChild(h2);
-
-  const focus=document.createElement('div');
-  focus.className='focus';
-  focus.textContent='Focus: '+data.focus;
-  section.appendChild(focus);
-
-  const table=document.createElement('table');
-  table.innerHTML='<thead><tr><th>Exercise</th><th>Sets / Reps</th><th>Status</th></tr></thead>';
-  const tbody=document.createElement('tbody');
-  data.exercises.forEach(ex=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+ex.name+'</td><td>'+ex.reps+'</td>';
-    tr.appendChild(createStatusCell(day+'-'+safeName(ex.name)));
-    tbody.appendChild(tr);
-  });
-  table.appendChild(tbody);
-  section.appendChild(table);
-
-  if(data.core && data.core.length){
-    const coreTitle=document.createElement('h3');
-    coreTitle.textContent='Core finisher';
-    section.appendChild(coreTitle);
-    const coreTable=document.createElement('table');
-    coreTable.innerHTML='<thead><tr><th>Exercise</th><th>Sets / Reps</th><th>Status</th></tr></thead>';
-    const coreTbody=document.createElement('tbody');
-    data.core.forEach(ex=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML='<td>'+ex.name+'</td><td>'+ex.reps+'</td>';
-      tr.appendChild(createStatusCell(day+'-core-'+safeName(ex.name)));
-      coreTbody.appendChild(tr);
+function loadMeals() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(MEAL_KEY)) || {};
+    document.querySelectorAll('#diet textarea[data-day]').forEach(area => {
+      const d = area.dataset.day;
+      if (saved[d] !== undefined) area.value = saved[d];
     });
-    coreTable.appendChild(coreTbody);
-    section.appendChild(coreTable);
+  } catch(e) {}
+}
+
+function saveMeals() {
+  const data = {};
+  document.querySelectorAll('#diet textarea[data-day]').forEach(area => {
+    data[area.dataset.day] = area.value;
+  });
+  localStorage.setItem(MEAL_KEY, JSON.stringify(data));
+}
+
+document.querySelectorAll('#diet textarea[data-day]').forEach(area => {
+  area.addEventListener('input', saveMeals);
+});
+
+loadMeals();
+
+// Copy feedback text (gym notes + diet)
+document.getElementById('copy-feedback').addEventListener('click', async () => {
+  const gymNotes = document.getElementById('gym-notes').value.trim();
+  const dietData = JSON.parse(localStorage.getItem(MEAL_KEY) || '{}');
+  let text = 'Gym notes: ' + (gymNotes || 'none') + '\n\nDiet plan this week:\n';
+  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(day => {
+    text += day + ': ' + (dietData[day] || '') + '\n';
+  });
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('Copied. Paste here for feedback.');
+  } catch(e) {
+    alert('If copy fails, you can still select the text after we add a display box.');
   }
-
-  if(data.functional && data.functional.length){
-    const fTitle=document.createElement('h3');
-    fTitle.textContent='Functional optional';
-    section.appendChild(fTitle);
-    const fTable=document.createElement('table');
-    fTable.innerHTML='<thead><tr><th>Exercise</th><th>Sets / Reps</th><th>Status</th></tr></thead>';
-    const fTbody=document.createElement('tbody');
-    data.functional.forEach(ex=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML='<td>'+ex.name+'</td><td>'+ex.reps+'</td>';
-      tr.appendChild(createStatusCell(day+'-functional-'+safeName(ex.name)));
-      fTbody.appendChild(tr);
-    });
-    fTable.appendChild(fTbody);
-    section.appendChild(fTable);
-  }
-
-  const notesTitle=document.createElement('h3');
-  notesTitle.textContent='Notes';
-  section.appendChild(notesTitle);
-  const notesArea=document.createElement('textarea');
-  notesArea.className='note';
-  notesArea.name=day+'-notes';
-  notesArea.placeholder='How did today feel? Any changes, soreness, sleep, mood, food, etc.';
-  section.appendChild(notesArea);
-
-  trackerDiv.appendChild(section);
-}
-
-function createDietSection(){
-  const mealData=getMealData();
-  const section=document.createElement('div');
-  section.className='day-section';
-  section.id='section-Diet';
-
-  const h2=document.createElement('h2');
-  h2.textContent='Diet';
-  section.appendChild(h2);
-
-  const hint=document.createElement('div');
-  hint.className='focus';
-  hint.textContent='Meal edits auto‑save (per browser/device). Submit Feedback saves workout status + notes.';
-  section.appendChild(hint);
-
-  workoutDays.forEach(day=>{
-    const title=document.createElement('h3');
-    title.textContent=day;
-    section.appendChild(title);
-
-    const table=document.createElement('table');
-    table.innerHTML='<thead><tr><th>Meal</th><th>Plan</th></tr></thead>';
-    const tbody=document.createElement('tbody');
-
-    Object.entries(dietPlan[day]).forEach(([mealName,defaultVal])=>{
-      const tr=document.createElement('tr');
-      const tdMeal=document.createElement('td');
-      tdMeal.textContent=mealName.charAt(0).toUpperCase()+mealName.slice(1);
-      const tdPlan=document.createElement('td');
-      const textarea=document.createElement('textarea');
-      textarea.className='meal-edit';
-      textarea.name=day+'-meal-'+mealName;
-      textarea.placeholder='Enter meal for '+day+' '+mealName;
-      textarea.value=(mealData[day] && mealData[day][mealName]!==undefined)
-        ? mealData[day][mealName]
-        : defaultVal;
-      textarea.addEventListener('input',()=>{
-        const current=getMealData();
-        if(!current[day]) current[day]={};
-        current[day][mealName]=textarea.value;
-        saveMealData(current);
-      });
-      tdPlan.appendChild(textarea);
-      tr.appendChild(tdMeal);
-      tr.appendChild(tdPlan);
-      tbody.appendChild(tr);
-    });
-
-    table.appendChild(tbody);
-    section.appendChild(table);
-  });
-
-  trackerDiv.appendChild(section);
-}
-
-function renderAllSections(){
-  tabsDiv.innerHTML='';
-  trackerDiv.innerHTML='';
-  tabs.forEach((t,i)=>createTab(t,i));
-  workoutDays.forEach((d,i)=>createWorkoutSection(d,i));
-  createDietSection();
-  // activate first tab (Mon) by default
-  setActiveDay(tabs[0]);
-}
-
-function setActiveDay(day){
-  document.querySelectorAll('.tab').forEach(t=>{
-    t.classList.toggle('active',t.dataset.day===day);
-  });
-  document.querySelectorAll('.day-section').forEach(sec=>{
-    sec.classList.toggle('active',sec.id==='section-'+day);
-  });
-}
-
-function submitFeedback(){
-  const data={};
-  document.querySelectorAll('input,textarea.note').forEach(el=>{
-    if(!el.name) return;
-    if(el.type==='radio'){
-      if(el.checked) data[el.name]=el.value;
-    } else {
-      data[el.name]=el.value;
-    }
-  });
-  localStorage.setItem(logKey,JSON.stringify(data));
-  alert('Feedback submitted');
-}
-
-function loadLog(){
-  const data=JSON.parse(localStorage.getItem(logKey) || '{}');
-  document.querySelectorAll('input,textarea.note').forEach(el=>{
-    if(!el.name) return;
-    if(el.type==='radio'){
-      if(data[el.name]===el.value) el.checked=true;
-    } else {
-      el.value=data[el.name] || '';
-    }
-  });
-}
-
-function clearLog(){
-  if(!confirm('Clear saved workout status and notes? Meal edits will stay.')) return;
-  localStorage.removeItem(logKey);
-  document.querySelectorAll('input[type="radio"]').forEach(el=>el.checked=false);
-  document.querySelectorAll('textarea.note').forEach(el=>el.value='');
-  alert('Workout status and notes cleared');
-}
-
-function resetMeals(){
-  if(!confirm('Reset all meal edits?')) return;
-  localStorage.removeItem(mealKey);
-  renderAllSections();
-  loadLog();
-  alert('Meals reset');
-}
-
-// initial render
-renderAllSections();
-loadLog();
+});
 </script>
 </body>
 </html>
