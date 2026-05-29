@@ -40,6 +40,7 @@ textarea.meal-box {
 }
 button.copy-btn {padding:9px 12px;background:#2ecc71;color:#fff;border:none;cursor:pointer;margin-top:8px;border-radius:6px;font-size:12px;}
 button.copy-btn:hover {background:#27ae60;}
+.hiit-row td:first-child {color:#c0392b;font-weight:600;}
 
 @media (max-width: 480px) {
   body {margin:8px;}
@@ -68,199 +69,283 @@ button.copy-btn:hover {background:#27ae60;}
 <script>
 // ------------ CONFIG ------------
 const dayOrder = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-const STORAGE_KEY = 'fitness_tracker_autosave_v1';
+const STORAGE_KEY = 'fitness_tracker_autosave_v2';
 
-// NEW GYM SPLIT
+// ---- UPDATED GYM PLAN ----
 const gymPlan = {
   Mon: {
     focus: 'Lower body + glutes',
     exercises: [
-      {name:'Leg press', reps:'3 x 12'},
-      {name:'Romanian deadlift', reps:'3 x 10-12'},
-      {name:'Leg curl', reps:'3 x 12-15'},
-      {name:'Hip thrust or glute bridge machine', reps:'3 x 12'},
-      {name:'Hip abduction', reps:'3 x 15-20'},
-      {name:'Calf raise', reps:'3 x 15-20'}
+      {name:'Leg press', reps:'3 x 12',
+        note:'Go moderate-heavy — last 2 reps should feel hard. Feet shoulder-width, press through heels not toes. Full range: lower until knees near 90°. Biggest calorie burner of your week.'},
+      {name:'Romanian deadlift', reps:'3 x 10-12',
+        note:'Moderate weight — this is a stretch exercise, not a heavy lift. Hinge at hips, push bum back, feel a deep pull in your hamstrings. Back stays flat. If you feel it in your lower back, go lighter.'},
+      {name:'Hip thrust / glute bridge machine', reps:'3 x 12',
+        note:'Go heavy here — glutes can handle it. Drive through your heels, squeeze hard at the top and hold 1 second. Should feel entirely in your glutes, not your lower back.'},
+      {name:'Leg curl', reps:'3 x 12-15',
+        note:'Moderate weight, slow and controlled. Lower slowly (3 counts down) — that\'s where the real work happens. Feel your hamstrings pulling, not your calves gripping.'},
+      {name:'Hip abduction', reps:'3 x 15-20',
+        note:'Light-moderate. 2 sec out, 2 sec back. You should feel a deep burn in the outer glute. If you\'re swinging or using momentum, go lighter.'},
+      {name:'Calf raise', reps:'3 x 15-20',
+        note:'Moderate weight. Full range — all the way up on tiptoes, all the way down for a stretch. Pause 1 sec at top. Don\'t rush.'}
     ],
     core: [
-      {name:'Front plank', reps:'3 rounds'},
-      {name:'Side plank', reps:'2 rounds each side'}
+      {name:'Front plank', reps:'3 rounds',
+        note:'Hold 30-45 sec. Squeeze belly button toward your spine — don\'t let hips sag or pike. Breathe normally throughout.'},
+      {name:'Dead bug', reps:'2 x 10',
+        note:'Press lower back flat into the floor the whole time — that\'s the entire point. Extend opposite arm and leg together, return slowly. Trains the deep core muscles that flatten your belly.'},
+      {name:'HIIT finisher — treadmill sprints', reps:'12 min: 30 sec speed 8-9 / 30 sec walk, repeat', hiit:true,
+        note:'Speed 8 is fine to start, build to 9 over weeks. Should feel breathless during the sprint, recovered enough to go again by end of the walk.'}
     ],
-    functional: [
-      {name:'Incline treadmill walk', reps:'15 min, speed 5, incline 10'}
-    ]
+    functional: []
   },
   Tue: {
     focus: 'Rest / recovery / walking',
     exercises: [
-      {name:'Walk', reps:'7k-10k steps'},
-      {name:'Light stretching', reps:'10-15 min'},
-      {name:'Mobility work', reps:'Optional 10 min'}
+      {name:'Walk', reps:'7k-10k steps',
+        note:'Outdoors if possible. Easy pace — this is recovery, not a workout.'},
+      {name:'Light stretching', reps:'10-15 min',
+        note:'Focus on quads, hamstrings, glutes — whatever feels tight from Monday.'},
+      {name:'Hip flexor stretch', reps:'10 min',
+        note:'Kneel on one knee, push hips forward gently, feel the front of the hip open. Hold 30-45 sec per side x 3. This reduces forward pelvic tilt — the thing that makes your belly stick out more than it needs to. Do this consistently.'}
     ],
     core: [],
     functional: []
   },
   Wed: {
-    focus: 'Upper body pull + posture',
+    focus: 'Upper body pull + arms',
     exercises: [
-      {name:'Lat pulldown', reps:'3 x 10-12'},
-      {name:'Seated row', reps:'3 x 10-12'},
-      {name:'Face pull', reps:'3 x 12-15'},
-      {name:'Reverse fly', reps:'2-3 x 12-15'},
-      {name:'Biceps curl', reps:'2-3 x 10-12'}
+      {name:'Lat pulldown', reps:'3 x 10-12',
+        note:'Moderate weight. Pull bar to upper chest. Lean back slightly, drive elbows down toward hips — imagine cracking a walnut under each armpit. Creates a V-shape that makes the waist look narrower.'},
+      {name:'Seated row', reps:'3 x 10-12',
+        note:'Moderate weight. Sit tall, pull to belly button, squeeze shoulder blades together at end — hold 1 sec. Don\'t let your back round on the return.'},
+      {name:'Face pull', reps:'3 x 15',
+        note:'Keep this LIGHT — it\'s a posture exercise, not a strength move. Elbows high and wide, pull toward your forehead. Fixes rounded shoulders so you stand taller.'},
+      {name:'Reverse fly', reps:'3 x 12-15',
+        note:'Very light weight — most people go too heavy here. Hinge forward slightly, lift arms to the sides like flying. Slow and controlled. Feel the squeeze between shoulder blades at the top.'},
+      {name:'Biceps curl', reps:'3 x 10-12',
+        note:'Moderate weight. Elbows stay at your sides — don\'t let them swing forward. Full range, squeeze at the top. 2-second controlled lower.'},
+      {name:'Hammer curl', reps:'2 x 12',
+        note:'Neutral grip (thumbs up). Slightly heavier than regular curl. Hits the outer bicep and underneath — gives arms that defined look from all angles, especially important for cap sleeves.'}
     ],
     core: [
-      {name:'Pallof press', reps:'3 x 12 each side'},
-      {name:'Side plank', reps:'2-3 rounds'}
+      {name:'Pallof press', reps:'3 x 12 each side',
+        note:'Light-moderate resistance. Stand sideways to cable/band, press straight out, hold 2 sec, return. Core resists rotation — don\'t let hips twist. One of the best exercises for waist definition.'},
+      {name:'Side plank', reps:'3 rounds each side',
+        note:'Hold 30-40 sec per side. Don\'t let hips drop. Feel your obliques — the muscles that cinch your waist.'},
+      {name:'HIIT finisher — rower intervals', reps:'12 min: 45 sec hard / 15 sec rest, repeat', hiit:true,
+        note:'Drive with legs first, then lean back, then pull arms. On rest, keep moving slowly — don\'t stop completely. No rower? Do treadmill sprints instead (same timing).'}
     ],
-    functional: [
-      {name:'Incline treadmill walk', reps:'15 min, speed 5, incline 10'}
-    ]
+    functional: []
   },
   Thu: {
-    focus: 'Lower body 2 + waist focus',
+    focus: 'HIIT + core intensive — midriff focus',
     exercises: [
-      {name:'Split squat or step-up', reps:'3 x 10 each leg'},
-      {name:'Smith squat / goblet squat', reps:'3 x 10-12'},
-      {name:'Leg curl', reps:'3 x 12-15'},
-      {name:'Hip abduction', reps:'3 x 15-20'},
-      {name:'Walking lunges', reps:'2 rounds'}
+      {name:'HIIT — treadmill intervals', reps:'20 min: 40 sec speed 8-9 / 20 sec walk x 15 rounds', hiit:true,
+        note:'Most important fat-burning session of the week — your midriff is fully bare in the lehenga. Start at speed 7-8 if 9 is too intense. Do not skip this day.'},
+      {name:'Cable woodchop', reps:'3 x 12 each side',
+        note:'Light-moderate weight. Set cable high, pull diagonally to opposite hip. Rotation comes from your waist — arms just hold on. Directly targets the obliques that define your waist.'}
     ],
     core: [
-      {name:'Front plank', reps:'3 rounds'},
-      {name:'Dead bug or leg raises', reps:'2-3 rounds'}
+      {name:'Bicycle crunches', reps:'4 x 25',
+        note:'Slow is better than fast. Bring opposite elbow to knee, extend the other leg long. Feel your obliques, not your neck.'},
+      {name:'Russian twists (with weight)', reps:'4 x 20',
+        note:'Start with a light plate (2-3kg). Feet can be on the floor to start. Rotate from your waist, touch weight to the floor each side. Control it — don\'t fling.'},
+      {name:'Leg raises', reps:'4 x 15',
+        note:'Lower back pressed into the floor the whole time. Lower legs slowly (3 counts). Bend knees slightly if straight legs are too difficult.'},
+      {name:'Mountain climbers', reps:'4 x 20',
+        note:'Keep hips level — don\'t let them bounce up and down. Drive knees toward chest alternately. This is cardio AND core simultaneously.'},
+      {name:'Side plank', reps:'4 x 40 sec each side',
+        note:'Don\'t let hips drop or rotate forward. Stack or stagger feet. Keep breathing steadily — when you hold your breath, your form is breaking down.'}
     ],
-    functional: [
-      {name:'Incline treadmill walk', reps:'15 min, speed 5, incline 10'}
-    ]
+    functional: []
   },
   Fri: {
-    focus: 'Upper body push + arms',
+    focus: 'Upper body push + arms heavy',
     exercises: [
-      {name:'Chest press', reps:'3 x 10-12'},
-      {name:'Shoulder press', reps:'3 x 10-12'},
-      {name:'Lateral raise', reps:'3 x 15'},
-      {name:'Triceps pushdown', reps:'3 x 12'},
-      {name:'Overhead triceps extension', reps:'2-3 x 12-15'}
+      {name:'Chest press', reps:'3 x 10-12',
+        note:'Moderate weight. Feel a stretch in your chest at the bottom, press up and slightly inward. Don\'t lock out elbows at the top. Builds chest which improves how the blouse sits on you.'},
+      {name:'Shoulder press', reps:'3 x 10-12',
+        note:'Moderate weight. Sit tall, don\'t arch lower back. Press straight up, lower slowly (3 counts). Broader shoulders visually narrow your waist — matters a lot for the lehenga silhouette.'},
+      {name:'Lateral raise', reps:'3 x 15',
+        note:'Keep this LIGHT — 2-3kg is often enough. Lift arms to the side to shoulder height, lead with elbows not wrists. Very slow controlled lower (3 counts). Builds width that makes your waist look smaller by comparison.'},
+      {name:'Triceps pushdown', reps:'3 x 12',
+        note:'Moderate weight. Elbows stay glued to sides the whole time — they\'re an anchor. Press all the way down, hold 1 sec, let up slowly. Feel the back of the arm. Cap sleeves expose this area directly.'},
+      {name:'Overhead triceps extension', reps:'3 x 12-15',
+        note:'Moderate weight. Keep elbows pointing forward, not flaring out. Lower slowly behind your head, feel the stretch, press back up. Hits the long head of the tricep — most visible part when arm hangs down.'},
+      {name:'Triceps kickback', reps:'2 x 15',
+        note:'Light weight. Hinge forward, upper arm parallel to floor, extend arm fully back and hold 1 sec at full extension. Slow and intentional — no swinging. Isolates the part of the tricep most visible in a cap sleeve.'}
     ],
     core: [
-      {name:'Pallof hold / press', reps:'2-3 rounds'},
-      {name:'Front plank', reps:'3 rounds'}
+      {name:'Front plank', reps:'3 rounds',
+        note:'Hold 40-50 sec by this point in the week. If arms are tired, drop to knees — still effective.'},
+      {name:'HIIT finisher — treadmill sprints', reps:'12 min: 30 sec speed 8-9 / 30 sec walk, repeat', hiit:true,
+        note:'End of the week — you\'re tired but push through. These 12 minutes after strength training burn fat effectively because glycogen is already depleted. Speed 7 counts — just go hard relative to what you have left.'}
     ],
-    functional: [
-      {name:'Incline treadmill walk', reps:'15 min, speed 5, incline 10'}
-    ]
+    functional: []
   },
   Sat: {
-    focus: 'Conditioning + core',
+    focus: 'Full body + extended session (weekend)',
     exercises: [
-      {name:'Incline treadmill intervals or rower', reps:'20-25 min'},
-      {name:'Farmer’s carry', reps:'3 rounds'},
-      {name:'Mobility / stretching', reps:'10 min'}
+      {name:'Compound circuit x3: goblet squat, dumbbell row, push-up, shoulder press', reps:'12 reps each exercise, minimal rest between',
+        note:'Use lighter weights than your usual — you\'re doing 4 exercises back to back. The goal is elevated heart rate + full body stimulus. Rest 90 sec between full rounds only. Should feel like cardio with weights.'},
+      {name:'Farmers carry', reps:'4 rounds (go heavier than usual)',
+        note:'Pick the heaviest dumbbells you can hold with good posture — shoulders back, core tight, walk tall. Each round is 20-30 metres or 30 seconds. Burns a surprising amount of calories and builds core stability.'},
+      {name:'HIIT cardio — rower or treadmill intervals', reps:'25-30 min (longer than weekday finishers)', hiit:true,
+        note:'Longest cardio of your week — use the extra weekend time. Mix if you want: 15 min rower + 15 min treadmill. Keep intensity high. This + Monday legs are your two biggest fat-burning sessions.'}
     ],
     core: [
-      {name:'Side plank', reps:'2 rounds each side'},
-      {name:'Front plank', reps:'2 rounds'}
+      {name:'Bicycle crunches', reps:'3 x 25',
+        note:'Slow and controlled. Quality over speed.'},
+      {name:'Russian twists (with weight)', reps:'3 x 20',
+        note:'Try going slightly heavier than Thursday if it felt easy. Rotate from the waist.'},
+      {name:'Leg raises', reps:'3 x 15',
+        note:'Lower back flat to the floor throughout. Slow controlled lower.'},
+      {name:'Front plank', reps:'3 rounds',
+        note:'Hold 40-50 sec. Belly pulled in, glutes squeezed.'},
+      {name:'Side plank', reps:'3 rounds each side',
+        note:'Hold 35-40 sec per side. Obliques cinch the waist — don\'t skip these.'}
     ],
-    functional: [
-      {name:'Optional long walk', reps:'20-30 min'}
-    ]
+    functional: []
   },
   Sun: {
-    focus: 'Active recovery / yoga / easy walk',
+    focus: 'Active recovery + stretch',
     exercises: [
-      {name:'Long easy walk', reps:'20-40 min'},
-      {name:'Stretch / yoga', reps:'10-20 min'}
+      {name:'Easy incline walk', reps:'35-40 min, speed 4, incline 8',
+        note:'Recovery movement, not a workout. Conversational pace. Good time for music or a podcast.'},
+      {name:'Full body stretch / yoga', reps:'20-25 min',
+        note:'Focus on hamstrings, glutes, chest, shoulders — whatever feels tight. Hold each stretch 30-45 sec. YouTube "10 min post-workout stretch" if you want guidance.'},
+      {name:'Hip flexor stretch (priority)', reps:'10 min',
+        note:'Kneel on one knee, push hips gently forward, feel the front of hip open. Hold 40 sec per side x 3 rounds. Do this every Sunday consistently — your posture will visibly improve in 2 weeks, making your belly look flatter even at the same weight.'}
     ],
     core: [],
     functional: []
   }
 };
+// ---- DIET PLAN (from Week 1 Excel — update weekly) ----
+const COMMON_MORNING = 'Multivitamin sachet – 1 glass\n5 almonds + 1 brazil nut + 1 walnut\n4 black raisins soaked overnight\n(add rose petals to water if you like)';
+const COMMON_POST_WORKOUT = 'Protein scoop – 1 scoop in 200-250 ml water';
+const COMMON_SNACK1_OFFICE = 'Black coffee – 1 cup';
+const COMMON_MM = 'Coconut water – 1 glass (have it with pulp part)';
+const COMMON_POST_LUNCH = 'Spearmint tea – 1 cup (30 min after meal)\nWalk for 10 minutes';
+const COMMON_EVENING_COFFEE = 'Black coffee – 1 cup (optional)';
+const COMMON_EVENING_PROTEIN = 'Eggs – 3 (2 whites + 1 whole) BOILED\nOR Greek yoghurt – 90g';
+const COMMON_SNACK2 = 'Fruit – 150g (apple / pear / guava / kiwi / orange / papaya / peach / plum / berries / mango-half only)\n+ 1 tsp sunflower seeds + 1 tsp sesame seeds (10g total)\nOR black coffee';
+const COMMON_POST_DINNER = 'Chamomile tea – 1 cup\nCastor oil – apply on navel';
 
-// DIET PLAN (from your Week 2 file, can keep editing in UI)
 const dietPlan = {
   Mon: {
     focus: 'Diet – Monday',
     meals: {
-      'EARLY MORNING (before workout)': 'multivitamin sachet-1 glass\n5 almonds + 1 brazil nut + 1 walnut\n4 black raisins (soaked overnight)',
-      'AFTER WORKOUT': 'protein scoop – 1 scoop in 200–250 ml water',
-      'SNACK 1 (before leaving for office)': 'black coffee – 1 cup',
-      'MM (after you reach office)': 'coconut water – 1 glass (with pulp)',
-      'LUNCH': 'light daal 1 katori (150 g cooked)\nwhite rice 1 katori (120 g) / 1 chapati (jowar/khapli)\ncurd 1 katori (150 g)\ncucumber salad 1 plate',
-      'POST LUNCH (in office)': 'spearmint tea – 1 cup\n10 min walk',
-      'BLACK COFFEE (evening – optional)': 'black coffee – 1 cup',
-      'SNACK 1 (evening protein)': 'eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g',
-      'SNACK 2 (before leaving for home)': 'fruit 150 g\n1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee',
-      'DINNER': 'paneer 100 g\ncooked veggies (no raw tomato)\ncucumber salad 1 plate\ncoriander chutney 1 spoon',
-      'POST DINNER': 'chamomile tea 1 cup\ncastor oil on navel'
+      'EARLY MORNING (before workout)': COMMON_MORNING,
+      'AFTER WORKOUT': COMMON_POST_WORKOUT,
+      'SNACK 1 (before leaving for office)': COMMON_SNACK1_OFFICE,
+      'MID-MORNING (after you reach office)': COMMON_MM,
+      'LUNCH': 'Option 1: Rajma / channa / lobia / light daal – 1 katori (150g cooked)\n+ white rice 1 katori (120g boiled) OR chapati 1 (jowar/khapli)\n+ curd 1 katori (150g) + cucumber salad 1 plate\n(Soak pulses overnight, strain, use fresh water to cook)\n\nOption 2: Sambhar 1 katori (150g) + idli 2 pieces\n+ cucumber salad 1 plate + coriander chutney 1 spoon',
+      'POST LUNCH (in office)': COMMON_POST_LUNCH,
+      'EVENING COFFEE (optional)': COMMON_EVENING_COFFEE,
+      'EVENING SNACK — protein': COMMON_EVENING_PROTEIN,
+      'SNACK 2 (before leaving for home)': COMMON_SNACK2,
+      'DINNER': 'Paneer – 100g (marinate in red chilli, salt, pepper, amchur, ginger garlic paste)\nGrill / roast / oven bake it\n+ Boiled cooked veggies (onion, tomato, peas, beans, capsicum, carrot, sweet corn, broccoli — nothing raw)\n+ Cucumber salad 1 plate + coriander chutney 1 spoon\n(Can make as paneer tikka or chilly paneer salad)',
+      'POST DINNER': COMMON_POST_DINNER
     }
   },
   Tue: {
-    focus: 'Diet – Tuesday',
+    focus: 'Diet – Tuesday (rest day)',
     meals: {
-      'EARLY MORNING (before workout)': 'multivitamin sachet-1 glass\n5 almonds + 1 brazil nut + 1 walnut\n4 black raisins (soaked overnight)',
-      'AFTER WORKOUT': 'protein scoop – 1 scoop in 200–250 ml water',
-      'SNACK 1 (before leaving for office)': 'black coffee – 1 cup',
-      'MM (after you reach office)': 'coconut water – 1 glass (with pulp)',
-      'LUNCH': 'sambhar 1 katori (150 g)\nidli 2 pieces / plain dosa 1\ncucumber salad 1 plate\ncoconut chutney 1 spoon',
-      'POST LUNCH (in office)': 'spearmint tea – 1 cup\n10 min walk',
-      'BLACK COFFEE (evening – optional)': 'black coffee – 1 cup',
-      'SNACK 1 (evening protein)': 'eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g',
-      'SNACK 2 (before leaving for home)': 'fruit 150 g\n1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee',
-      'DINNER': 'paneer 60 g + jowar roti 1 + cucumber salad 1 plate\nOR similar option per your sheet',
-      'POST DINNER': 'chamomile tea 1 cup\ncastor oil on navel'
+      'EARLY MORNING': COMMON_MORNING,
+      'AFTER WORKOUT': COMMON_POST_WORKOUT,
+      'SNACK 1 (before leaving for office)': COMMON_SNACK1_OFFICE,
+      'MID-MORNING (after you reach office)': COMMON_MM,
+      'LUNCH': 'Paneer – 60g (paneer bhurji or curry form)\n+ Jowar roti – 1\n+ Cucumber tomato salad – 1 plate\n+ Coriander chutney – 1 spoon',
+      'POST LUNCH (in office)': COMMON_POST_LUNCH,
+      'EVENING COFFEE (optional)': COMMON_EVENING_COFFEE,
+      'EVENING SNACK — protein': COMMON_EVENING_PROTEIN,
+      'SNACK 2 (before leaving for home)': COMMON_SNACK2,
+      'DINNER': 'Light daal – 1 katori (150g cooked)\n+ Light veg – 1 katori (ghiya / tori / tinda / pumpkin / mix veg / mushroom peas / carrot peas / gobhi aloo / bhindi)\n+ Curd – 1 katori (150g)\n+ Cucumber tomato salad – 1 plate\n+ Coriander chutney – 1 spoon',
+      'POST DINNER': COMMON_POST_DINNER
     }
   },
   Wed: {
     focus: 'Diet – Wednesday',
     meals: {
-      'EARLY MORNING (before workout)': 'multivitamin sachet-1 glass\n5 almonds + 1 brazil nut + 1 walnut\n4 black raisins (soaked overnight)',
-      'AFTER WORKOUT': 'protein scoop – 1 scoop in 200–250 ml water',
-      'SNACK 1 (before leaving for office)': 'black coffee – 1 cup',
-      'MM (after you reach office)': 'coconut water – 1 glass (with pulp)',
-      'LUNCH': 'lobia / rajma / chana 1 katori (150 g cooked)\nwhite rice 1 katori / 1 chapati\ncurd 1 katori\ncucumber salad 1 plate',
-      'POST LUNCH (in office)': 'spearmint tea – 1 cup\n10 min walk',
-      'BLACK COFFEE (evening – optional)': 'black coffee – 1 cup',
-      'SNACK 1 (evening protein)': 'eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g',
-      'SNACK 2 (before leaving for home)': 'fruit 150 g\n1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee',
-      'DINNER': 'mushroom tikki / similar + light veg + curd + salad\ncheck sheet for exact version',
-      'POST DINNER': 'chamomile tea 1 cup\ncastor oil on navel'
+      'EARLY MORNING (before workout)': COMMON_MORNING,
+      'AFTER WORKOUT': COMMON_POST_WORKOUT,
+      'SNACK 1 (before leaving for office)': COMMON_SNACK1_OFFICE,
+      'MID-MORNING (after you reach office)': COMMON_MM,
+      'LUNCH': 'Option 1: Moong daal khichdi – 1 katori (120g)\n+ Light veg – 1 katori + curd 1 katori (150g) + cucumber salad 1 plate\n\nOption 2: Vegetable pulao – 1 katori (120g)\n+ Light veg + curd 1 katori + cucumber salad 1 plate\n\nOption 3: Samak rice – 1 katori (120g cooked)\n+ Light veg + curd + cucumber salad\n\nOption 4: 1 stuffed gobhi or onion parantha\n+ Light veg + curd + cucumber salad',
+      'POST LUNCH (in office)': COMMON_POST_LUNCH,
+      'EVENING COFFEE (optional)': COMMON_EVENING_COFFEE,
+      'EVENING SNACK — protein': COMMON_EVENING_PROTEIN,
+      'SNACK 2 (before leaving for home)': COMMON_SNACK2,
+      'DINNER': 'Mushroom tikki – 6 pieces\n+ Light veg – 1 katori\n+ Curd – 1 katori (150g)\n+ Cucumber tomato salad – 1 plate\n+ Coriander chutney – 1 spoon',
+      'POST DINNER': COMMON_POST_DINNER
     }
   },
   Thu: {
-    focus: 'Diet – Thursday',
+    focus: 'Diet – Thursday (HIIT day — eat well!)',
     meals: {
-      'EARLY MORNING (before workout)': 'multivitamin sachet-1 glass\n5 almonds + 1 brazil nut + 1 walnut\n4 black raisins (soaked overnight)',
-      'AFTER WORKOUT': 'protein scoop – 1 scoop in 200–250 ml water',
-      'SNACK 1 (before leaving for office)': 'black coffee – 1 cup',
-      'MM (after you reach office)': 'coconut water – 1 glass (with pulp)',
-      'LUNCH': 'paneer-60 gm -you can make it as paneer bhurji or as curry form + jowar roti-1 + cucumber tomato salad-1 plate + coriander chutney-1 spoon \nOR chilly paneer-60 gm & fried rice-1 katori-120 gm cooked measure & cucumber tomato salad01 plate & coriander chutney-1 spoon',
-      'POST LUNCH (in office)': 'spearmint tea – 1 cup\n10 min walk',
-      'BLACK COFFEE (evening – optional)': 'black coffee – 1 cup',
-      'SNACK 1 (evening protein)': 'eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g',
-      'SNACK 2 (before leaving for home)': 'fruit 150 g\n1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee',
-      'DINNER': 'light daal-1 katori-150 gm cooked measure + light veg-1 katori (ghiya, tori, tinda, pumpkin, mix veg, mushroom peas,c arrot peas, gobhi aloo, bhindi-etc) + curd-1 katori-150 gm + cucumber tomato salad-1 plate + coriander chutney-1 spoon',
-      'POST DINNER': 'chamomile tea 1 cup\ncastor oil on navel'
+      'EARLY MORNING (before workout)': COMMON_MORNING,
+      'AFTER WORKOUT': COMMON_POST_WORKOUT,
+      'SNACK 1 (before leaving for office)': COMMON_SNACK1_OFFICE,
+      'MID-MORNING (after you reach office)': COMMON_MM,
+      'LUNCH': 'Option 1: Paneer – 60g (bhurji or curry)\n+ Jowar roti – 1\n+ Cucumber tomato salad – 1 plate + coriander chutney 1 spoon\n\nOption 2: Chilly paneer – 60g\n+ Fried rice – 1 katori (120g cooked)\n+ Cucumber tomato salad – 1 plate + coriander chutney 1 spoon',
+      'POST LUNCH (in office)': COMMON_POST_LUNCH,
+      'EVENING COFFEE (optional)': COMMON_EVENING_COFFEE,
+      'EVENING SNACK — protein': COMMON_EVENING_PROTEIN,
+      'SNACK 2 (before leaving for home)': COMMON_SNACK2,
+      'DINNER': 'Soya keema – 25g (uncooked measure) — make as soya peas keema sabzi\n+ Light veg – 1 katori (ghiya / tori / tinda / pumpkin / mix veg / mushroom peas / carrot peas / gobhi aloo / bhindi)\n+ Curd – 1 katori (150g)\n+ Cucumber tomato salad – 1 plate\n+ Coriander chutney – 1 spoon',
+      'POST DINNER': COMMON_POST_DINNER
     }
   },
   Fri: {
     focus: 'Diet – Friday',
     meals: {
-      'EARLY MORNING (before workout)': 'multivitamin sachet-1 glass\n5 almonds + 1 brazil nut + 1 walnut\n4 black raisins (soaked overnight)',
-      'AFTER WORKOUT': 'protein scoop – 1 scoop in 200–250 ml water',
-      'SNACK 1 (before leaving for office)': 'black coffee – 1 cup',
-      'MM (after you reach office)': 'coconut water – 1 glass (with pulp)',
-      'LUNCH': 'moong daal khicdhi-1 katori-120 gm + light veg-1 katori (ghiya, tori, tinda, pumpkin, mix veg, mushroom peas, carrot peas, gobhi aloo-etc) + curd-1 katori-150 gm + cucumber salad-1 plate \nOR	vegetable pulao-1 katori-120 gm + light veg-1 katori (ghiya, tori, tinda, pumpkin, mix veg, mushroom peas, carrot peas, gobhi aloo-etc) + curd-1 katori-150 gm + cucumber salad-1 plate \nOR Samak rice-1 katori-120 gm cooked measure + light veg-1 katori (ghiya, tori, tinda, pumpkin, mix veg, mushroom peas, carrot peas, gobhi aloo-etc) + curd-1 katori-150 gm + cucumber salad-1 plate \nOR 1 stuffed gobhi or onion parantha + light veg-1 katori (ghiya, tori, tinda, pumpkin, mix veg, mushroom peas, carrot peas, gobhi aloo-etc) + curd-1 katori-150 gm + cucumber salad-1 plate',
-      'POST LUNCH (in office)': 'spearmint tea – 1 cup\n10 min walk',
-      'BLACK COFFEE (evening – optional)': 'black coffee – 1 cup',
-      'SNACK 1 (evening protein)': 'eggs 3 (2 whites + 1 whole) boiled OR Greek yoghurt 90 g',
-      'SNACK 2 (before leaving for home)': 'fruit 150 g\n1 tsp sunflower + 1 tsp sesame seeds (10 g total) OR black coffee',
-      'DINNER': 'mushroom tikki-6 pieces + light veg-1 katori (ghiya, tori, tinda, pumpkin, mix veg, mushroom peas,c arrot peas, gobhi aloo, bhindi-etc) + curd-1 katori-150 gm + cucumber tomato salad-1 plate + coriander chutney-1 spoon \nOR boiled moong bean sprouted tikki-6 pieces + light veg-1 katori (ghiya, tori, tinda, pumpkin, mix veg, mushroom peas,c arrot peas, gobhi aloo, bhindi-etc) + curd-1 katori-150 gm + cucumber tomato salad-1 plate + coriander chutney-1 spoon',
-      'POST DINNER': 'chamomile tea 1 cup\ncastor oil on navel'
+      'EARLY MORNING (before workout)': COMMON_MORNING,
+      'AFTER WORKOUT': COMMON_POST_WORKOUT,
+      'SNACK 1 (before leaving for office)': COMMON_SNACK1_OFFICE,
+      'MID-MORNING (after you reach office)': COMMON_MM,
+      'LUNCH': 'Option 1: Moong daal khichdi – 1 katori (120g)\n+ Light veg + curd (150g) + cucumber salad\n\nOption 2: Vegetable pulao – 1 katori (120g)\n+ Light veg + curd + cucumber salad\n\nOption 3: Samak rice – 1 katori (120g cooked)\n+ Light veg + curd + cucumber salad\n\nOption 4: 1 stuffed gobhi or onion parantha\n+ Light veg + curd + cucumber salad',
+      'POST LUNCH (in office)': COMMON_POST_LUNCH,
+      'EVENING COFFEE (optional)': COMMON_EVENING_COFFEE,
+      'EVENING SNACK — protein': COMMON_EVENING_PROTEIN,
+      'SNACK 2 (before leaving for home)': COMMON_SNACK2,
+      'DINNER': 'Option 1: Mushroom tikki – 6 pieces\n+ Light veg – 1 katori + curd (150g) + cucumber tomato salad + coriander chutney\n\nOption 2: Boiled moong bean sprouted tikki – 6 pieces\n+ Light veg – 1 katori + curd (150g) + cucumber tomato salad + coriander chutney',
+      'POST DINNER': COMMON_POST_DINNER
     }
   },
-  Sat: { focus: 'Diet – Saturday (flex / social)', meals: {} },
-  Sun: { focus: 'Diet – Sunday (flex / social)', meals: {} }
+  Sat: {
+    focus: 'Diet – Saturday',
+    meals: {
+      'EARLY MORNING (before workout)': COMMON_MORNING,
+      'AFTER WORKOUT': COMMON_POST_WORKOUT,
+      'SNACK 1 (before leaving for office)': COMMON_SNACK1_OFFICE,
+      'MID-MORNING': COMMON_MM,
+      'LUNCH': 'Option 1: Rajma / channa / lobia / light daal – 1 katori (150g cooked)\n+ White rice 1 katori (120g) OR chapati 1 (jowar/khapli)\n+ Curd 1 katori (150g) + cucumber salad 1 plate\n\nOption 2: Sambhar 1 katori (150g) + idli 2 / plain dosa 1\n+ Cucumber salad + coriander chutney 1 spoon\n\nOption 3: Kadhi 1 katori (150g — no pakoda)\n+ White rice 1 katori (120g)\n+ Cucumber tomato salad + coriander chutney',
+      'POST LUNCH': COMMON_POST_LUNCH,
+      'EVENING COFFEE (optional)': COMMON_EVENING_COFFEE,
+      'EVENING SNACK — protein': COMMON_EVENING_PROTEIN,
+      'SNACK 2': COMMON_SNACK2,
+      'DINNER': 'Paneer – 100g (marinate in red chilli, salt, pepper, amchur, ginger garlic paste)\nGrill / roast / oven bake it\n+ Boiled cooked veggies (onion, tomato, peas, beans, capsicum, carrot, sweet corn, broccoli — nothing raw)\n+ Cucumber salad 1 plate + coriander chutney 1 spoon\n(Can make as paneer tikka or chilly paneer salad)',
+      'POST DINNER': COMMON_POST_DINNER
+    }
+  },
+  Sun: {
+    focus: 'Diet – Sunday',
+    meals: {
+      'EARLY MORNING': COMMON_MORNING,
+      'AFTER WORKOUT': COMMON_POST_WORKOUT,
+      'SNACK 1': COMMON_SNACK1_OFFICE,
+      'MID-MORNING': COMMON_MM,
+      'LUNCH': 'Vegetable oats / daliya / poha / quinoa – 30g uncooked (140g cooked)\nAdd veggies: onion, tomato, peas, beans, capsicum, carrot, sweet corn — all properly cooked\n+ Light veg – 1 katori\n+ Curd – 1 katori (150g)\n+ Cucumber salad – 1 plate',
+      'POST LUNCH': COMMON_POST_LUNCH,
+      'EVENING COFFEE (optional)': COMMON_EVENING_COFFEE,
+      'EVENING SNACK — protein': 'Greek yoghurt – 90g (HIGH PROTEIN)',
+      'SNACK 2': COMMON_SNACK2,
+      'DINNER': 'Eggs – 3 (2 whites + 1 whole)\nAdd veggies: onion, tomato, peas, beans, capsicum, carrot, sweet corn, broccoli — all properly cooked, nothing raw\n+ Light veg – 1 katori\n+ Cucumber salad – 1 plate\n+ Coriander chutney – 1 spoon',
+      'POST DINNER': COMMON_POST_DINNER
+    }
+  }
 };
 
 // ------------ STATE & DOM ------------
@@ -308,8 +393,9 @@ function createTab(day) {
 
 function createGymRow(day, ex, groupPrefix) {
   const tr = document.createElement('tr');
+  if (ex.hiit) tr.classList.add('hiit-row');
   const safeName = (currentMode + '-' + day + '-' + groupPrefix + '-' + ex.name)
-    .replace(/[\s\/\-']/g,'_');
+    .replace(/[\s\/\-'⚡→⭐]/g,'_');
 
   const tdName = document.createElement('td');
   tdName.innerHTML = ex.name + (ex.note ? '<div class="small-note">' + ex.note + '</div>' : '');
@@ -413,7 +499,7 @@ function createDaySection(day) {
 
     if (data && data.functional && data.functional.length) {
       const title = document.createElement('h3');
-      title.textContent = 'Functional (optional – complements today’s focus)';
+      title.textContent = 'Functional';
       section.appendChild(title);
       const table = document.createElement('table');
       const head = document.createElement('thead');
@@ -425,8 +511,9 @@ function createDaySection(day) {
       section.appendChild(table);
     }
 
+    // Incline treadmill — shown on all gym days (mark skip on rest/recovery days)
     const cardioTitle = document.createElement('h3');
-    cardioTitle.textContent = 'Incline treadmill (most training days)';
+    cardioTitle.textContent = 'Incline treadmill (daily closer)';
     section.appendChild(cardioTitle);
     const cardioTable = document.createElement('table');
     const cardioHead = document.createElement('thead');
@@ -435,13 +522,14 @@ function createDaySection(day) {
     const cardioBody = document.createElement('tbody');
     const cTr = document.createElement('tr');
     const cName = document.createElement('td');
-    cName.innerHTML = 'Incline treadmill walk/jog<div class="small-note">Target: 15 min, speed 5, incline 10.</div>';
+    cName.innerHTML = 'Incline treadmill walk<div class="small-note">15 min — speed 5, incline 10. Skip on Tue / Sun.</div>';
     cTr.appendChild(cName);
     const safeName = ('gym-' + day + '-cardio').replace(/[\s\/\-']/g,'_');
     cTr.appendChild(createStatusCell(safeName, 'gym'));
     cardioBody.appendChild(cTr);
     cardioTable.appendChild(cardioBody);
     section.appendChild(cardioTable);
+
   } else {
     const meals = (data && data.meals) ? data.meals : {};
     Object.keys(meals).forEach(mealName => {
@@ -457,7 +545,7 @@ function createDaySection(day) {
   notesArea.className = 'note';
   notesArea.name = currentMode + '-' + day + '-notes';
   notesArea.placeholder = currentMode === 'gym'
-    ? 'How did today feel? Energy, soreness, weights, mood, etc.'
+    ? 'How did today feel? Energy, soreness, weights used, mood, etc.'
     : 'How did today feel? Hunger, cravings, digestion, social meals, etc.';
   section.appendChild(notesArea);
 
@@ -554,27 +642,27 @@ copyBtn.addEventListener('click', function () {
   if (!section) return;
 
   const lines = [];
-  lines.push('Daily check-in — ' + currentDay);
+  lines.push('Daily check-in \u2014 ' + currentDay);
   lines.push('Mode: ' + (currentMode === 'gym' ? 'Gym' : 'Diet'));
 
-  const focusText = section.querySelector('.focus')?.textContent || '';
+  const focusText = section.querySelector('.focus') ? section.querySelector('.focus').textContent : '';
   if (focusText) lines.push('Session: ' + focusText.replace('Focus:','').trim());
 
   if (currentMode === 'gym') {
     lines.push('Items:');
-    section.querySelectorAll('table').forEach(table => {
+    section.querySelectorAll('table').forEach(function(table) {
       const titleEl = table.previousElementSibling;
       const isCore = titleEl && titleEl.tagName === 'H3' && titleEl.textContent.toLowerCase().includes('core');
       const isFunc = titleEl && titleEl.tagName === 'H3' && titleEl.textContent.toLowerCase().includes('functional');
       const isCardio = titleEl && titleEl.tagName === 'H3' && titleEl.textContent.toLowerCase().includes('incline');
 
-      table.querySelectorAll('tbody tr').forEach(tr => {
+      table.querySelectorAll('tbody tr').forEach(function(tr) {
         const nameCell = tr.cells[0];
         const repsCell = tr.cells[1] || null;
         const radios = tr.querySelectorAll('input[type="radio"]');
         if (!nameCell) return;
         let status = 'skip';
-        radios.forEach(r => { if (r.checked) status = r.value.toLowerCase(); });
+        radios.forEach(function(r) { if (r.checked) status = r.value.toLowerCase(); });
 
         const name = nameCell.childNodes[0].textContent.trim();
         const reps = repsCell ? repsCell.textContent.trim() : '';
@@ -588,7 +676,7 @@ copyBtn.addEventListener('click', function () {
     });
   } else {
     lines.push('Meals:');
-    section.querySelectorAll('h3').forEach(h3 => {
+    section.querySelectorAll('h3').forEach(function(h3) {
       const mealName = h3.textContent.trim();
       if (mealName === 'Status' || mealName === 'Notes') return;
 
@@ -605,28 +693,29 @@ copyBtn.addEventListener('click', function () {
         : null;
 
       if (statusTable) {
-        statusTable.querySelectorAll('input[type="radio"]').forEach(r => {
+        statusTable.querySelectorAll('input[type="radio"]').forEach(function(r) {
           if (r.checked) status = r.value.toLowerCase();
         });
       }
 
       lines.push('- ' + mealName + ': ' + status);
       if (mealText) {
-        mealText.split('\n').forEach(line => {
+        mealText.split('\n').forEach(function(line) {
           if (line.trim()) lines.push('  - ' + line.trim());
         });
       }
     });
   }
 
-  const notes = section.querySelector('textarea.note')?.value.trim();
+  const notesEl = section.querySelector('textarea.note');
+  const notes = notesEl ? notesEl.value.trim() : '';
   if (notes) lines.push('Notes: ' + notes);
 
   const summary = lines.join('\n');
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(summary).then(() => {
-      alert('Summary copied. Paste it into chat for feedback.');
-    }).catch(() => {
+    navigator.clipboard.writeText(summary).then(function() {
+      alert('Summary copied! Paste it into chat for feedback.');
+    }).catch(function() {
       alert('Could not auto-copy. Check console.');
       console.log(summary);
     });
